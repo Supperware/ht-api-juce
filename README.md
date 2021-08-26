@@ -24,7 +24,7 @@ There are two easy ways of making your app or plug-in compatible with the head t
 
 An alternative to using the full API is to use part of it, or just to write your own MIDI interfacing code from scratch: the [support page](https://supperware.co.uk/headtracker) contains detailed MIDI documentation.
 
-Supperware's support page links to some getting-started examples in other languages, mostly provided by customers, and you may find something there that you prefer to begin with.
+Our support page also links to some getting-started examples in other languages, mostly provided by customers, and you may find something there that you prefer to begin with.
 
 Even if you use the API, please still download Bridgehead and run it periodically. One thing that Bridgehead will do that the API does not is upgrade the head tracker firmware. Anything that complicated is going to have bugs!
 
