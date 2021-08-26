@@ -1,3 +1,7 @@
+# JUCE stuff
+demo/Builds/
+demo/JuceLibraryCode/
+
 # Prerequisites
 *.d
 
