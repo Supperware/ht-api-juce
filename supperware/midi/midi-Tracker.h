@@ -16,10 +16,10 @@ namespace Midi
     class Tracker: public MidiDuplex
     {
     public:
-        class Receiver
+        class Listener
         {
         public:
-            virtual ~Receiver() {};
+            virtual ~Listener() {};
             
             // The head tracker sends only one of these, depending what you ask for in turnOn().
             /** Yaw/Pitch/Roll. */
@@ -39,10 +39,10 @@ namespace Midi
             virtual void trackUpdatedState(bool /*rightEarChirality*/, bool /*compassOn*/, Midi::TravelMode /*travelMode*/) {}
         };
 
-        /** You must nominate a Tracker::Receiver in the constructor. This is usually the parent class. */
-        Tracker(Receiver* dataReceiver) :
+        /** You must nominate a Tracker::Listener in the constructor. This is usually the parent class. */
+        Tracker(Listener* l) :
             MidiDuplex("Head Tracker", "Supperware Bootloader"),
-            receiver(dataReceiver),
+            listener(l),
             set100Hz(false), trackerOn(false), rightEarChirality(false), compassOn(false),
             gestureShake(false), gestureTap(false),
             angleFormat(AngleFormat::YPR),
@@ -161,7 +161,7 @@ namespace Midi
                 float yawRadian = bytes211ToFloat(&data[5]);
                 float pitchRadian = bytes211ToFloat(&data[7]);
                 float rollRadian = bytes211ToFloat(&data[9]);
-                receiver->trackOrientation(yawRadian, pitchRadian, rollRadian);
+                listener->trackOrientation(yawRadian, pitchRadian, rollRadian);
             }
             else if (sysexMatch(data, numBytes, 0x40, 0x01, 13))
             {
@@ -169,7 +169,7 @@ namespace Midi
                 float qx = bytes211ToFloat(&data[7]);
                 float qy = bytes211ToFloat(&data[9]);
                 float qz = bytes211ToFloat(&data[11]);
-                receiver->trackOrientationQ(qw, qx, qy, qz);
+                listener->trackOrientationQ(qw, qx, qy, qz);
             }
             else if (sysexMatch(data, numBytes, 0x40, 0x02, 23))
             {
@@ -183,7 +183,7 @@ namespace Midi
                 z.x = bytes211ToFloat(&data[17]);
                 z.y = bytes211ToFloat(&data[19]);
                 z.z = bytes211ToFloat(&data[21]);
-                receiver->trackOrientationM(x, y, z);
+                listener->trackOrientationM(x, y, z);
             }
             else if (data[3] == 0x42 && (numBytes >= 6) && !(numBytes & 1))
             {
@@ -246,13 +246,13 @@ namespace Midi
 
                 sendReadbackRequests();
             }
-            receiver->trackConnectionState(connectionState);
+            listener->trackConnectionState(connectionState);
         }
 
         // ------------------------------------------------------------------------
 
     private:
-        Receiver* receiver;
+        Listener* listener;
         Vector3D<float> position;
         bool set100Hz, trackerOn, rightEarChirality, compassOn;
         bool gestureShake, gestureTap;
@@ -298,7 +298,7 @@ namespace Midi
                 case 2: compassState = CompassState::GoodData; break;
                 default: compassState = CompassState::Calibrating; break;
                 }
-                receiver->trackCompassState(compassState);
+                listener->trackCompassState(compassState);
             }
             else if (parameter == 0x04)
             {
@@ -313,7 +313,7 @@ namespace Midi
                 else if (value == 3) compassState = CompassState::Failed;
                 else if (value == 4) compassState = CompassState::BadData;
                 else if (value == 5) compassState = CompassState::GoodData;
-                receiver->trackCompassState(compassState);
+                listener->trackCompassState(compassState);
             }
             else if (parameter == 0x11)
             {
@@ -321,7 +321,7 @@ namespace Midi
                 if ((value & 7) == 7) travelMode = TravelMode::Fast;
                 else if ((value & 7) == 6) travelMode = TravelMode::Slow;
                 else travelMode = TravelMode::Off;
-                receiver->trackUpdatedState(rightEarChirality, compassOn, travelMode);
+                listener->trackUpdatedState(rightEarChirality, compassOn, travelMode);
             }
         }
     };

@@ -11,19 +11,19 @@ namespace HeadPanel
     /** Component that manages head tracker settings, disconnection/reconnection, and shows 
       * instantaneous head angle. Also owns Midi::Tracker and SBR::HeadMatrix objects, which
       * are useful everywhere else. */
-    class HeadPanel: public Component, Timer, Midi::Tracker::Receiver, HeadButton::Listener
+    class HeadPanel: public Component, Timer, Midi::Tracker::Listener, HeadButton::Listener
 
     {
     public:
-        class Receiver
+        class Listener
         {
         public:
-            virtual ~Receiver() {};
+            virtual ~Listener() {};
             virtual void trackerChanged(const HeadMatrix& headMatrix) = 0;
         };
 
         HeadPanel() :
-            receiver(nullptr),
+            listener(nullptr),
             tracker(this),
             headMatrix(),
             settingsPanel(tracker),
@@ -71,7 +71,7 @@ namespace HeadPanel
         {
             headMatrix.setOrientationYPR(yawRadian, pitchRadian, rollRadian);
             plot.recalculate(headMatrix);
-            if (receiver) receiver->trackerChanged(headMatrix);
+            if (listener) listener->trackerChanged(headMatrix);
             flagRepaint();
         }
 
@@ -81,7 +81,7 @@ namespace HeadPanel
         {
             headMatrix.setOrientationQuaternion(qw, qx, qy, qz);
             plot.recalculate(headMatrix);
-            if (receiver) receiver->trackerChanged(headMatrix);
+            if (listener) listener->trackerChanged(headMatrix);
             flagRepaint();
         }
 
@@ -110,7 +110,7 @@ namespace HeadPanel
                     headMatrix.zero();
                 }
                 settingsPanel.trackConnectionState(newState);
-                if(receiver) receiver->trackerChanged(headMatrix);
+                if (listener) listener->trackerChanged(headMatrix);
                 flagRepaint();
             }
         }
@@ -203,13 +203,13 @@ namespace HeadPanel
 
         //----------------------------------------------------------- ----------
 
-        void setReceiver(Receiver* r)
+        void setListener(Listener* l)
         {
-            receiver = r;
+            listener = l;
         }
 
     private:
-        Receiver* receiver;
+        Listener* listener;
         Midi::Tracker tracker;
         HeadMatrix headMatrix;
         ConfigPanel::SettingsPanel settingsPanel;

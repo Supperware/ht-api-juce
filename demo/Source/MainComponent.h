@@ -10,7 +10,7 @@ using namespace juce;
 
 //==============================================================================
 
-class MainComponent  : public juce::Component, HeadPanel::HeadPanel::Receiver
+class MainComponent  : public juce::Component, HeadPanel::HeadPanel::Listener
 {
 public:
     //==============================================================================
