@@ -79,7 +79,7 @@ public:
     // --------------------------------------------------------------------
 
     /** Transform body coordinates to world-based coordinates: most
-        * usefully, to paint the animated head. */
+        usefully, to paint the animated head. */
     void transform(float& x, float& y, float &z) const
     {
         // used to paint head
@@ -94,8 +94,8 @@ public:
     // --------------------------------------------------------------------
         
     /** Transform world-based coordinates to body coordinates: most
-        * usefully, to shift virtual loudspeakers from a room-based to an
-        * egocentric coordinate system, for rendering. */
+        usefully, to rotate virtual loudspeakers from a room-based to an
+        egocentric coordinate system. */
     void transformTranspose(float& x, float& y, float &z) const
     {
         const float tx = x;
@@ -108,10 +108,11 @@ public:
 
     // --------------------------------------------------------------------
 
-    /** Cosines of left- and right-facing angles to the room coordinate [0,-1,0],
-        * which can steer room reverb. So returns [0,0] when the listener is looking
-        * straight head, and [1,-1] or [-1,1] when the listener has their head turned
-        * 90 degrees left or right. */
+    /** Cosines of left- and right-ear poles to the room coordinate [0,-1,0]
+        (directed towards the back wall). So returns [0,0] when the listener
+        is looking straight ahead, and [1,-1] or [-1,1] when the listener
+        has their head turned 90 degrees left or right.
+        Useful for certain reverberation models. */
     void getEarVectors(float& left, float& right) const
     {
         // as [0,-1,0] and the rotation matrix entry are both unit vectors,

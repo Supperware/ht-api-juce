@@ -73,7 +73,7 @@ namespace Midi
         // ------------------------------------------------------------------------
 
         /** If set100Hz is false, the tracker responds at 50Hz.
-          * These settings are remembered if you enable setAutoDisconnect / setAutoReconnect. */
+            These settings are remembered if you enable setAutoDisconnect / setAutoReconnect. */
         void turnOn(bool is100HzMode = false, bool isQuaternionMode = true)
         {
             if (connectionState != State::Connected)
