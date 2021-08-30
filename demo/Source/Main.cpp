@@ -4,9 +4,9 @@
     JUCE demo for the Supperware Head Tracker API.
     Written by Supperware Ltd as guidance for developers.
 
-    For the avoidance of doubt, you may do as you wish with this demo project.
-    The files in this project folder may be treated as public domain
-    (Creative Commons Zero). Almost all of this is JUCE boilerplate code anyway.
+    You may do as you wish with this demo project. The files in this project
+    folder are released to the public domain (Creative Commons Zero).
+    Almost all of this is JUCE boilerplate code anyway.
 
   ==============================================================================
 */

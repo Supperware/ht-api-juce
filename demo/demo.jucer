@@ -5,6 +5,7 @@
   <MAINGROUP id="oAIKB4" name="demo">
     <GROUP id="{4B87B3A5-8D18-2E7A-4711-3FBCEFC2E41C}" name="supperware">
       <FILE id="nvVhHe" name="HeadMatrix.h" compile="0" resource="0" file="../supperware/HeadMatrix.h"/>
+      <FILE id="RHYzjw" name="Tracker.h" compile="0" resource="0" file="../supperware/Tracker.h"/>
     </GROUP>
     <GROUP id="{18156CF1-7AF2-8530-8FBB-388CA84DC40E}" name="configPanel">
       <FILE id="sbmVeG" name="configPanel-BasePanel.h" compile="0" resource="0"
@@ -35,7 +36,8 @@
     <GROUP id="{8D8CF61B-2670-23B3-DA2E-F2CDB7910C69}" name="midi">
       <FILE id="hJKGNd" name="midi-MidiDuplex.h" compile="0" resource="0"
             file="../supperware/midi/midi-MidiDuplex.h"/>
-      <FILE id="xi2zzA" name="midi-Tracker.h" compile="0" resource="0" file="../supperware/midi/midi-Tracker.h"/>
+      <FILE id="qjpPaT" name="midi-TrackerDriver.h" compile="0" resource="0"
+            file="../supperware/midi/midi-TrackerDriver.h"/>
       <FILE id="VCAzEP" name="midi.h" compile="0" resource="0" file="../supperware/midi/midi.h"/>
     </GROUP>
     <GROUP id="{617B61CB-13C2-C65E-8D3C-8EFA0A5DDA5D}" name="Source">

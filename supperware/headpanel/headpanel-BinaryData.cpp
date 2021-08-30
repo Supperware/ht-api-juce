@@ -1,6 +1,6 @@
 /*
  * Head tracker panel and driver API
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 namespace HeadPanel

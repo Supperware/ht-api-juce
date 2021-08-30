@@ -2,7 +2,7 @@
  * MIDI drivers
  * Container for JUCE MIDI input and output objects,
  * so MIDI traffic can more easily be administered in both directions
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once
@@ -156,7 +156,7 @@ namespace Midi
 
             if (message.isSysEx())
             {
-                const uint8* m = message.getSysExData();
+                const uint8_t* m = message.getSysExData();
                 const size_t s = message.getSysExDataSize();
                 handleSysEx(m, s);
             }
@@ -209,7 +209,7 @@ namespace Midi
 
         // ------------------------------------------------------------------------
 
-        virtual void handleSysEx(const uint8* /*data*/, const size_t /*numBytes*/) {}
+        virtual void handleSysEx(const uint8* /*buffer*/, const size_t /*numBytes*/) {}
         virtual void handleMidi(const MidiMessage& /*message*/) {}
         virtual void connectionStateChanged() {}
         

@@ -1,6 +1,6 @@
 /*
  * Head tracker configuration panels
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once

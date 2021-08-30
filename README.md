@@ -20,13 +20,21 @@ There are two easy ways of making your app or plug-in compatible with the head t
 2. In your case, tightness of integration might be secondary to allowing users to remix or manipulate the head tracker data. Such users might prefer to work with OSC.
 3. You won't have to download this code, or work with C++ or JUCE.
 
+### Using this API without JUCE
+
+JUCE provides cross-platform libraries for MIDI and graphics. If you'd rather not use it, you don't have to start from scratch. The following header files do not require JUCE, and will compile with just the standard libraries:
+
+`Tracker.h` is a helper class. It builds outgoing MIDI messages in the correct form, interprets incoming MIDI messages and routes these to appropriate callbacks, and looks after a structure that represents the current configuration of the head tracker. To see how this is wrapped in JUCE, take a look at `midi/midi-TrackerDriver.h`.
+
+`HeadMatrix.h` translates the data that the head tracker sends (either yaw/pitch/roll or quaternions) into a transformation matrix. This may be used directly to perform world-to-head or head-to-world transformations.
+
 ### The third way, and a bit about Bridgehead
 
-An alternative to using the full API is to use part of it, or just to write your own MIDI interfacing code from scratch: the [support page](https://supperware.co.uk/headtracker) contains detailed MIDI documentation.
+If none of this is what you need, you may have to write your own MIDI interface code from scratch: the [support page](https://supperware.co.uk/headtracker) contains detailed MIDI documentation.
 
-Our support page also links to some getting-started examples in other languages, mostly provided by customers, and you may find something there that you prefer to begin with.
+That page also links to getting-started examples in other languages, mostly provided by customers: you may find something there that you prefer to begin with.
 
-Even if you use the API, please still download Bridgehead and run it periodically. One thing that Bridgehead will do that the API does not is upgrade the head tracker firmware. Anything that complicated is going to have bugs!
+Even if you want to use the API for everything, please still download Bridgehead and run it periodically. One thing that Bridgehead will do that the API does not is upgrade the head tracker firmware. Anything that complicated is going to have bugs!
 
 ## How to get this demo running
 
@@ -36,7 +44,7 @@ In use, plug in a head tracker. A tick will become visible in the bottom left co
 
 A configuration window can be opened by clicking on the pictogram of the head tracker in the top-left. This presents a handy but reduced subset of the functions you would find if you were using _Bridgehead_.
 
-You probably don't care whether you're interfacing with the head tracker via quaternions or yaw, pitch, and roll. While the head tracker and API supports both (search for `tracker.turnOn` in `headpanel-Component.h`), it's recommended to keep using quaternions unless you have a great reasson not to. In head tracking, gimbal lock is mostly a problem in theory only: yaw/pitch/roll will start to go slightly awry when a user's head is pitched fully skywards or downwards, and generally people don't enjoy those contortions. But, if you use quaternions, you won't have to worry about them at all.
+You probably don't care whether you're interfacing with the head tracker via quaternions or yaw, pitch, and roll. While the head tracker and API supports both (search for `trackerDriver.turnOn` in `headpanel-Component.h`), it's recommended to keep using quaternions unless you have a great reasson not to. In head tracking, gimbal lock is mostly a problem in theory only: yaw/pitch/roll will start to go slightly awry when a user's head is pitched fully skywards or downwards, and generally people don't enjoy those contortions. But, if you use quaternions, you won't have to worry about them at all.
 
 ## Licensing
 

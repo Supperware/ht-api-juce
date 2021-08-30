@@ -1,7 +1,7 @@
 /*
  * Head tracker panel and driver API
  * Animated head and configuration buttons
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once
@@ -11,7 +11,7 @@ namespace HeadPanel
     /** Component that manages head tracker settings, disconnection/reconnection, and shows 
       * instantaneous head angle. Also owns Midi::Tracker and SBR::HeadMatrix objects, which
       * are useful everywhere else. */
-    class HeadPanel: public Component, Timer, Midi::Tracker::Listener, HeadButton::Listener
+    class HeadPanel: public Component, Timer, Midi::TrackerDriver::Listener, HeadButton::Listener
 
     {
     public:
@@ -24,14 +24,14 @@ namespace HeadPanel
 
         HeadPanel() :
             listener(nullptr),
-            tracker(this),
+            trackerDriver(this),
             headMatrix(),
-            settingsPanel(tracker),
+            settingsPanel(trackerDriver),
             hbConfigure(this, 0),
             hbConnect(this, 1),
             plot(),
             doRepaint(false),
-            state(Midi::State::Unavailable)
+            midiState(Midi::State::Unavailable)
         {
             MemoryInputStream mis(BinaryData::mini_tile_png, BinaryData::mini_tile_pngSize, false);
             Image im = ImageFileFormat::loadFrom(mis);
@@ -44,9 +44,9 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        const Midi::Tracker& getTracker() const
+        const Midi::TrackerDriver& getTrackerDriver() const
         {
-            return tracker;
+            return trackerDriver;
         }
 
         //----------------------------------------------------------------------
@@ -62,12 +62,12 @@ namespace HeadPanel
         {
             //g.setColour(Colour(0xff404040));
             //g.drawRect(g.getClipBounds(), 1.0f);
-            plot.paint(g, 48 + 50, 48 + 4, 48.0f, 2.0f, state);
+            plot.paint(g, 48 + 50, 48 + 4, 48.0f, 2.0f, midiState);
         }
 
         //----------------------------------------------------------------------
 
-        void trackOrientation(float yawRadian, float pitchRadian, float rollRadian) override
+        void trackerOrientation(float yawRadian, float pitchRadian, float rollRadian) override
         {
             headMatrix.setOrientationYPR(yawRadian, pitchRadian, rollRadian);
             plot.recalculate(headMatrix);
@@ -77,7 +77,7 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void trackOrientationQ(float qw, float qx, float qy, float qz) override
+        void trackerOrientationQ(float qw, float qx, float qy, float qz) override
         {
             headMatrix.setOrientationQuaternion(qw, qx, qy, qz);
             plot.recalculate(headMatrix);
@@ -87,18 +87,18 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void trackConnectionState(Midi::State newState) override
+        void trackerMidiConnectionChanged(Midi::State newState) override
         {
-            if (newState != state)
+            if (newState != midiState)
             {
-                state = newState;
+                midiState = newState;
 
-                if ((state == Midi::State::Connected) || (state == Midi::State::Bootloader))
+                if ((midiState == Midi::State::Connected) || (midiState == Midi::State::Bootloader))
                 {
                     hbConnect.setVisible(true);
                     hbConnect.setSelected(true);
                 }
-                else if (state == Midi::State::Available)
+                else if (midiState == Midi::State::Available)
                 {
                     hbConnect.setVisible(true);
                     hbConnect.setSelected(false);
@@ -117,23 +117,23 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void trackCompassState(Midi::CompassState compassState) override
+        void trackerCompassStateChanged(Tracker::CompassState compassState) override
         {
             settingsPanel.trackCompassState(compassState);
         }
 
         //----------------------------------------------------------------------
 
-        void trackUpdatedState(bool rightEarChirality, bool compassOn, Midi::TravelMode travelMode) override
+        void trackerConnectionChanged(const Tracker::State& state) override
         {
-            settingsPanel.trackUpdatedState(rightEarChirality, compassOn, travelMode);
+            settingsPanel.trackUpdatedState(state.rightEarChirality, state.compassOn, state.travelMode);
         }
 
         //----------------------------------------------------------------------
 
         void mouseDoubleClick(const MouseEvent& /*event*/) override
         {
-            tracker.zero();
+            trackerDriver.zero();
         }
 
         //----------------------------------------------------------------------
@@ -156,14 +156,14 @@ namespace HeadPanel
             else if (index == 1)
             {
                 // connect/disconnect button
-                if (state == Midi::State::Available)
+                if (midiState == Midi::State::Available)
                 {
-                    tracker.connect();
-                    tracker.turnOn(false, Midi::AngleFormat::Quaternion);
+                    trackerDriver.connect();
+                    trackerDriver.turnOn(false, true);
                 }
                 else
                 {
-                    tracker.disconnect();
+                    trackerDriver.disconnect();
                 }
             }
         }
@@ -210,14 +210,14 @@ namespace HeadPanel
 
     private:
         Listener* listener;
-        Midi::Tracker tracker;
+        Midi::TrackerDriver trackerDriver;
         HeadMatrix headMatrix;
         ConfigPanel::SettingsPanel settingsPanel;
 
         HeadButton hbConfigure, hbConnect;
         HeadPlot plot;
         bool doRepaint;
-        Midi::State state;
+        Midi::State midiState;
 
         void flagRepaint()
         {

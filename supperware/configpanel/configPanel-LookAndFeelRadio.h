@@ -1,7 +1,7 @@
 /*
  * Head tracker configuration panels
  * Extends JUCE LookAndFeel to draw proper radio buttons
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once

@@ -1,6 +1,6 @@
 /*
  * Head tracker configuration panels
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once
@@ -10,9 +10,9 @@ namespace ConfigPanel
     class SettingsPanel: public BasePanel
     {
     public:
-        SettingsPanel(Midi::Tracker& headTracker):
+        SettingsPanel(Midi::TrackerDriver& trackerDriver):
             BasePanel(""),
-            ht(headTracker)
+            td(trackerDriver)
         {
             Point<int> position(4, yOrigin());
             addLabel(position, "Chirality", LabelStyle::SectionHeading);
@@ -55,19 +55,19 @@ namespace ConfigPanel
             if (isTextButton)
             {
                 // button is disabled via the readback
-                ht.calibrateCompass();
+                td.calibrateCompass();
             }
             else
             {
                 switch(index)
                 {
-                case 0: if (isChecked) ht.setChirality(false);  break;
-                case 1: if (isChecked) ht.setChirality(true);   break;
-                case 2: if (isChecked) ht.setCompass(true);    break;
-                case 3: if (isChecked) ht.setCompass(false);   break;
-                case 4: if (isChecked) ht.setTravelMode(Midi::TravelMode::Off);     break;
-                case 5: if (isChecked) ht.setTravelMode(Midi::TravelMode::Slow);    break;
-                case 6: if (isChecked) ht.setTravelMode(Midi::TravelMode::Fast);    break;
+                case 0: if (isChecked) td.setChirality(false);  break;
+                case 1: if (isChecked) td.setChirality(true);   break;
+                case 2: if (isChecked) td.setCompass(true);    break;
+                case 3: if (isChecked) td.setCompass(false);   break;
+                case 4: if (isChecked) td.setTravelMode(Tracker::TravelMode::Off);     break;
+                case 5: if (isChecked) td.setTravelMode(Tracker::TravelMode::Slow);    break;
+                case 6: if (isChecked) td.setTravelMode(Tracker::TravelMode::Fast);    break;
                 }
             }
         }
@@ -86,7 +86,7 @@ namespace ConfigPanel
 
         // ---------------------------------------------------------------------
 
-        void setCompassState(Midi::CompassState newCompassState)
+        void setCompassState(Tracker::CompassState newCompassState)
         {
             compassState = newCompassState;
             setCompassLabel();
@@ -96,13 +96,13 @@ namespace ConfigPanel
 
         void trackConnectionState(Midi::State /*newState*/)
         {
-            setEnabled(ht.isConnected());
+            setEnabled(td.isConnected());
             setCompassLabel();
         }
 
         // ---------------------------------------------------------------------
 
-        void trackCompassState(Midi::CompassState newCompassState)
+        void trackCompassState(Tracker::CompassState newCompassState)
         {
             if (compassState != newCompassState)
             {
@@ -113,10 +113,10 @@ namespace ConfigPanel
 
         // ---------------------------------------------------------------------
 
-        void trackUpdatedState(bool rightEarChirality, bool compassOn, Midi::TravelMode travelMode)
+        void trackUpdatedState(bool rightEarChirality, bool compassOn, Tracker::TravelMode travelMode)
         {
             MessageManagerLock mml;
-            bool isConnected = ht.isConnected();
+            bool isConnected = td.isConnected();
             setEnabled(isConnected);
             if(isConnected)
             {
@@ -126,9 +126,9 @@ namespace ConfigPanel
                 toggleButtons[2]->setToggleState(compassOn, dontSendNotification);
                 toggleButtons[3]->setToggleState(!compassOn, dontSendNotification);
                 //
-                toggleButtons[4]->setToggleState(travelMode == Midi::TravelMode::Off, dontSendNotification);
-                toggleButtons[5]->setToggleState(travelMode == Midi::TravelMode::Slow, dontSendNotification);
-                toggleButtons[6]->setToggleState(travelMode == Midi::TravelMode::Fast, dontSendNotification);
+                toggleButtons[4]->setToggleState(travelMode == Tracker::TravelMode::Off, dontSendNotification);
+                toggleButtons[5]->setToggleState(travelMode == Tracker::TravelMode::Slow, dontSendNotification);
+                toggleButtons[6]->setToggleState(travelMode == Tracker::TravelMode::Fast, dontSendNotification);
             }
             flagRepaint();
         }
@@ -136,8 +136,8 @@ namespace ConfigPanel
         // ---------------------------------------------------------------------
 
     private:
-        Midi::Tracker& ht;
-        Midi::CompassState compassState;
+        Midi::TrackerDriver& td;
+        Tracker::CompassState compassState;
 
         // ---------------------------------------------------------------------
 
@@ -145,16 +145,16 @@ namespace ConfigPanel
         {
             MessageManagerLock mml; // needed for setEnabled
             String labelText = "";
-            if (ht.isConnected())
+            if (td.isConnected())
             {
-                if (compassState == Midi::CompassState::Calibrating)    labelText = "CALIBRATING";
-                else if (compassState == Midi::CompassState::Succeeded) labelText = "SUCCEEDED";
-                else if (compassState == Midi::CompassState::Failed)    labelText = "FAILED";
-                else if (compassState == Midi::CompassState::GoodData)  labelText = "GOOD DATA";
-                else if (compassState == Midi::CompassState::BadData)   labelText = "BAD DATA";
+                if (compassState == Tracker::CompassState::Calibrating)    labelText = "CALIBRATING";
+                else if (compassState == Tracker::CompassState::Succeeded) labelText = "SUCCEEDED";
+                else if (compassState == Tracker::CompassState::Failed)    labelText = "FAILED";
+                else if (compassState == Tracker::CompassState::GoodData)  labelText = "GOOD DATA";
+                else if (compassState == Tracker::CompassState::BadData)   labelText = "BAD DATA";
             }
             labels[2]->setText(labelText, dontSendNotification);
-            textButtons[0]->setEnabled(compassState != Midi::CompassState::Calibrating);
+            textButtons[0]->setEnabled(compassState != Tracker::CompassState::Calibrating);
         }
     };
 };

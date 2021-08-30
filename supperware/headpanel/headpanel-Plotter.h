@@ -1,7 +1,7 @@
 /*
  * Head tracker panel and driver API
  * Plots a wireframe head in the required orientation
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once

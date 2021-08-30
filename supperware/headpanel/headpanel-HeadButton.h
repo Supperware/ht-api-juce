@@ -1,7 +1,7 @@
 /*
  * Head tracker panel and driver API
  * A simple clickable, hoverable image button
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once

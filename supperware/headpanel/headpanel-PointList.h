@@ -1,7 +1,7 @@
 /*
  * Head tracker panel and driver API
  * Z-buffered linked list for storing points and drawing wireframes
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once

@@ -1,6 +1,7 @@
 /*
  * Head rotation matrix: interchange of head orientation data
- * Copyright 2020 Supperware Ltd. All rights reserved.
+ * This class doesn't need JUCE!
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once
@@ -68,7 +69,7 @@ public:
 
     void setOrientationMatrix(const float* mat)
     {
-        for (int i = 0; i < 9; ++i)
+        for (uint8_t i = 0; i < 9; ++i)
         {
             matWrite[i] = mat[i];
         }
@@ -130,7 +131,7 @@ private:
     float matrix[2*9];
     float* matWrite;
     float* matRead;
-    uint8 matWriteIndex;
+    uint8_t matWriteIndex;
     bool matrixChanged;
 
     // ------------------------------------------------------------------------
@@ -138,7 +139,7 @@ private:
     void eyeMatrix(float* mat)
     {
         // identity matrix
-        for (uint8 i = 0; i < 9; ++i)
+        for (uint8_t i = 0; i < 9; ++i)
         {
             mat[i] = (i & 3) ? 0.f : 1.f;
         }
@@ -166,7 +167,7 @@ private:
 
     // --------------------------------------------------------------------
 
-    void rotatePlane(uint8 ccwRowIndex, uint8 cwRowIndex, float angleRadian)
+    void rotatePlane(uint8_t ccwRowIndex, uint8_t cwRowIndex, float angleRadian)
     {
         float sinAngle = sinf(angleRadian);
         float cosAngle = cosf(angleRadian);
@@ -177,7 +178,7 @@ private:
 
     // --------------------------------------------------------------------
 
-    void rotatePlaneTranspose(uint8 ccwColIndex, uint8 cwColIndex, float angleRadian)
+    void rotatePlaneTranspose(uint8_t ccwColIndex, uint8_t cwColIndex, float angleRadian)
     {
         float sinAngle = sinf(angleRadian);
         float cosAngle = cosf(angleRadian);

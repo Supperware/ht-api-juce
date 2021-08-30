@@ -4,6 +4,7 @@
 using namespace juce;
 
 #include "HeadMatrix.h"
+#include "Tracker.h"
 #include "midi.h"
 #include "configPanel.h"
 #include "headPanel.h"
