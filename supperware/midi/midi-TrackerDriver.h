@@ -40,19 +40,19 @@ namespace Midi
         // ------------------------------------------------------------------------
 
         // pass through to our listener
-        void trackerOrientation(float yawRadian, float pitchRadian, float rollRadian)
+        void trackerOrientation(float yawRadian, float pitchRadian, float rollRadian) override
         {
             l->trackerOrientation(yawRadian, pitchRadian, rollRadian);
         }
-        void trackerOrientationQ(float qw, float qx, float qy, float qz)
+        void trackerOrientationQ(float qw, float qx, float qy, float qz) override
         {
             l->trackerOrientationQ(qw, qx, qy, qz);
         }
-        void trackerCompassStateChanged(Tracker::CompassState compassState)
+        void trackerCompassStateChanged(Tracker::CompassState compassState) override
         {
             l->trackerCompassStateChanged(compassState);
         }
-        void trackerConnectionChanged(const Tracker::State& state)
+        void trackerConnectionChanged(const Tracker::State& state) override
         {
             l->trackerConnectionChanged(state);
         }
