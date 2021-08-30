@@ -24,9 +24,8 @@ There are two easy ways of making your app or plug-in compatible with the head t
 
 JUCE provides cross-platform libraries for MIDI and graphics. If you'd rather not use it, you don't have to start from scratch. The following header files do not require JUCE, and will compile with just the standard libraries:
 
-`Tracker.h` is a helper class. It builds outgoing MIDI messages in the correct form, interprets incoming MIDI messages and routes these to appropriate callbacks, and looks after a structure that represents the current configuration of the head tracker. To see how this is wrapped in JUCE, take a look at `midi/midi-TrackerDriver.h`.
-
-`HeadMatrix.h` translates the data that the head tracker sends (either yaw/pitch/roll or quaternions) into a transformation matrix. This may be used directly to perform world-to-head or head-to-world transformations.
+- `Tracker.h` is a helper class. It builds outgoing MIDI messages in the correct form, interprets incoming MIDI messages and routes these to appropriate callbacks, and looks after a structure that represents the current configuration of the head tracker. To see how this is wrapped in JUCE, take a look at `midi/midi-TrackerDriver.h`.
+- `HeadMatrix.h` translates the data that the head tracker sends (either yaw/pitch/roll or quaternions) into a transformation matrix. This may be used directly to perform world-to-head or head-to-world transformations.
 
 ### The third way, and a bit about Bridgehead
 
