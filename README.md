@@ -24,8 +24,8 @@ There are two easy ways of making your app or plug-in compatible with the head t
 
 JUCE provides cross-platform libraries for MIDI and graphics. If you'd rather not use it, you don't have to start from scratch. The following header files do not require JUCE, and will compile with just the standard libraries:
 
-- `Tracker.h` is a helper class. It builds outgoing MIDI messages in the correct form, interprets incoming MIDI messages and routes these to appropriate callbacks, and looks after a structure that represents the current configuration of the head tracker. To see how this is wrapped in JUCE, take a look at `midi/midi-TrackerDriver.h`.
-- `HeadMatrix.h` translates the data that the head tracker sends (either yaw/pitch/roll or quaternions) into a transformation matrix. This may be used directly to perform world-to-head or head-to-world transformations.
+- `supperware/HeadMatrix.h` transforms orientation data from the head tracker (either yaw/pitch/roll or quaternions) into a double-buffered 3D rotation matrix. This may be used directly to perform world-to-head or head-to-world rotations.
+- `supperware/Tracker.h` is a helper class. It builds appropriate outgoing MIDI messages, interprets incoming MIDI messages and routes them to appropriate callbacks, and maintains a copy of the current configuration state of the head tracker. To see how this is wrapped in JUCE, take a look at `supperware/midi/midi-TrackerDriver.h`.
 
 ### The third way, and a bit about Bridgehead
 
@@ -37,13 +37,13 @@ Even if you want to use the API for everything, please still download Bridgehead
 
 ## How to get this demo running
 
-If you've not used JUCE before, you should start by downloading it [here](https://github.com/juce-framework/JUCE). The workflow is then the traditional JUCE one. Build the Projucer, use it to open `demo\demo.jucer`, and point the Projucer to your JUCE library. You can then generate the appropriate project file, and open and build it in your usual SDK.
+If you've not used JUCE before, you should start by downloading it [here](https://github.com/juce-framework/JUCE). The workflow is then the traditional JUCE one. Build the Projucer, use it to open `demo/demo.jucer`, and point the Projucer to your JUCE library. You can then generate the appropriate project file, and open and build it in your usual SDK.
 
 In use, plug in a head tracker. A tick will become visible in the bottom left corner of the head tracker panel. Click on it once to connect to the head tracker. The tick will turn green, while a wireframe head appears and moves to show the current head orientation. Double-click on the head to zero the tracker. Click on the tick again to disconnect.
 
 A configuration window can be opened by clicking on the pictogram of the head tracker in the top-left. This presents a handy but reduced subset of the functions you would find if you were using _Bridgehead_.
 
-You probably don't care whether you're interfacing with the head tracker via quaternions or yaw, pitch, and roll. While the head tracker and API supports both (search for `trackerDriver.turnOn` in `headpanel-Component.h`), it's recommended to keep using quaternions unless you have a great reasson not to. In head tracking, gimbal lock is mostly a problem in theory only: yaw/pitch/roll will start to go slightly awry when a user's head is pitched fully skywards or downwards, and generally people don't enjoy those contortions. But, if you use quaternions, you won't have to worry about them at all.
+You probably don't care whether you're interfacing with the head tracker via quaternions or yaw, pitch, and roll. While the head tracker and API supports both (search for `trackerDriver.turnOn` in `supperware/headpanel/headpanel-Component.h`), it's recommended to keep using quaternions unless you have a great reasson not to. In head tracking, gimbal lock is mostly a problem in theory only: yaw/pitch/roll will start to go slightly awry when a user's head is pitched fully skywards or downwards, and generally people don't enjoy those contortions. But, if you use quaternions, you won't have to worry about them at all.
 
 ## Licensing
 

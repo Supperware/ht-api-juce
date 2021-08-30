@@ -1,6 +1,5 @@
 /*
- * MIDI drivers
- * Head tracker state and MIDI processing.
+ * Head tracker: state maintenance and MIDI helper class.
  * This class doesn't need JUCE!
  * Copyright (c) 2021 Supperware Ltd.
  */
