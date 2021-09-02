@@ -146,7 +146,7 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** Format a System Exclusive message to turn the cmopass on or off
+    /** Format a System Exclusive message to turn the compass on or off
         (when it's off, it's in 'slow central pull' mode). */
     size_t compassMessage(uint8_t* buffer, bool compassShouldBeOn, UpdateMode updateMode = UpdateWithoutNotifying)
     {
