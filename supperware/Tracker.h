@@ -76,7 +76,7 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** formats a System Exclusive message to turn on the head tracker,
+    /** Format a System Exclusive message to turn on the head tracker,
         and returns the size in bytes. If quaternionMode is false, the
         yaw/pitch/roll callback will be used. If use100Hz is false, the
         head tracker will respond at 50Hz. */
@@ -96,7 +96,7 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** formats a System Exclusive message to turn off the head tracker,
+    /** Format a System Exclusive message to turn off the head tracker,
         and returns the size in bytes */
     size_t turnOffMessage(uint8_t* buffer) const
     {
@@ -105,7 +105,7 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** formats a System Exclusive message to zero the head tracker,
+    /** Format a System Exclusive message to zero the head tracker,
         and returns the size in bytes */
     size_t zeroMessage(uint8_t* buffer) const
     {
@@ -114,7 +114,7 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** formats a System Exclusive message to determine whether the cable should be
+    /** Format a System Exclusive message to determine whether the cable should be
         over the left or right ear. */
     size_t chiralityMessage(uint8_t* buffer, bool isRightEarChirality, UpdateMode updateMode = UpdateWithoutNotifying)
     {
@@ -128,7 +128,7 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** formats a System Exclusive message to set the automatic zeroing [travel] mode
+    /** Format a System Exclusive message to set the automatic zeroing [travel] mode
         (works only when the compass is off). */
     size_t travelModeMessage(uint8_t* buffer, const TravelMode newTravelMode, UpdateMode updateMode = UpdateWithoutNotifying)
     {
@@ -140,13 +140,13 @@ public:
         uint8_t travelByte;
         /**/ if (newTravelMode == TravelMode::Slow) { travelByte = 0x06; }
         else if (newTravelMode == TravelMode::Fast) { travelByte = 0x07; }
-        else { travelByte = 0x04; }
+        else /*  newTravelMode == TravelMode::Off */{ travelByte = 0x04; }
         return singleValueSysex(buffer, 0x01, 0x01, travelByte);
     }
 
     // ------------------------------------------------------------------------
 
-    /** ormats a System Exclusive message to turn the cmopass on or off
+    /** Format a System Exclusive message to turn the cmopass on or off
         (when it's off, it's in 'slow central pull' mode). */
     size_t compassMessage(uint8_t* buffer, bool compassShouldBeOn, UpdateMode updateMode = UpdateWithoutNotifying)
     {
@@ -160,7 +160,7 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** Put compass in calibration mode. */
+    /** Format a System Exclusive message to put the compass in calibration mode. */
     size_t calibrateCompassMessage(uint8_t* buffer) const
     {
         return singleValueSysex(buffer, 0x00, 0x03, 0x44);
@@ -168,7 +168,9 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** This should be sent to get the head tracker status whenever a device is newly connected */
+    /** Format a System Exclusive readback message.
+        This message should be sent to the head tracker whenever it is newly connected:
+        this will refresh the Status object and notify the listener. */
     size_t readbackMessage(uint8_t* buffer) const
     {
         constexpr int MessageLength = 9;
@@ -183,7 +185,7 @@ public:
     // ------------------------------------------------------------------------
 
     /** The buffer passed to this call and the byte count should be stripped of
-        the leading 0xF0 and trailing 0xF7. Returns true if we handle the 
+        the leading 0xF0 and trailing 0xF7. Returns true if we have handled the 
         message. */
     bool processSysex(const uint8_t* buffer, size_t numBytes)
     {
@@ -218,7 +220,8 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** Retrieve the current state of the head tracker: usually as a response*/
+    /** Retrieves the current state of the head tracker. If this isn't being
+        kept up-to-date, make sure you've used the readbackMessage method! */
     const State& getState() const
     {
         return state;
@@ -278,8 +281,7 @@ private:
         size_t numBytesToMatch, uint8_t messageNumber) noexcept
     {
         if (numBytes != numBytesToMatch) return false;
-        if (buffer[3] != messageNumber) return false;
-        return true;
+        return (buffer[3] == messageNumber);
     }
 
     // ------------------------------------------------------------------------
