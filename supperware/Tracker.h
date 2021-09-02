@@ -52,6 +52,9 @@ public:
 
         /** Called when the head tracker's connection state or its status data is changed */
         virtual void trackerConnectionChanged(const State& /*state*/) {}
+
+        /** Called when the gyroscope calibration has finished */
+        virtual void trackerGyroCalibrated() {}
     };
 
     // ------------------------------------------------------------------------
@@ -278,22 +281,10 @@ private:
     // ------------------------------------------------------------------------
 
     static bool sysexMatch(const uint8_t* buffer, size_t numBytes,
-        size_t numBytesToMatch, uint8_t messageNumber) noexcept
+        size_t numBytesToMatch, uint8_t messageNumber, uint8_t parameterNumber) noexcept
     {
         if (numBytes != numBytesToMatch) return false;
-        return (buffer[3] == messageNumber);
-    }
-
-    // ------------------------------------------------------------------------
-
-    static bool sysexMatch(const uint8_t* buffer, size_t numBytes,
-        size_t numBytesToMatch, uint8_t messageNumber,
-        uint8_t parameterNumber) noexcept
-    {
-        if (!sysexMatch(buffer, numBytes, numBytesToMatch, messageNumber))
-        {
-            return false;
-        }
+        if (buffer[3] != messageNumber) return false;
         return (buffer[4] == parameterNumber);
     }
 
@@ -307,10 +298,10 @@ private:
             state.compassOn = (value & 0x38) >= 0x30;
             switch (value & 3)
             {
-            case 0: state.compassState = CompassState::Off; break;
             case 1: state.compassState = CompassState::BadData; break;
             case 2: state.compassState = CompassState::GoodData; break;
-            default: state.compassState = CompassState::Calibrating; break;
+            case 3: state.compassState = CompassState::Calibrating; break;
+            default: state.compassState = CompassState::Off;
             }
             if (l) l->trackerCompassStateChanged(state.compassState);
         }
@@ -330,7 +321,11 @@ private:
             case 4: state.compassState = CompassState::BadData; break;
             case 5: state.compassState = CompassState::GoodData; break;
             }
-            if (l) l->trackerCompassStateChanged(state.compassState);
+            if (l)
+            {
+                if (value == 6) l->trackerGyroCalibrated();
+                else if (value) l->trackerCompassStateChanged(state.compassState);
+            }
         }
         else if (parameter == 0x11)
         {
