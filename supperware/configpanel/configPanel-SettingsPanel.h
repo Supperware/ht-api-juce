@@ -30,9 +30,7 @@ namespace ConfigPanel
             addLabel(rightPos, "", LabelStyle::SubData);
             position.addXY(0, 14);
 
-            addLabel(position, "Travel mode (not preserved;", LabelStyle::SectionHeading);
-            position.addXY(0, -14);
-            addLabel(position, "inactive when using compass)", LabelStyle::SectionHeading);
+            addLabel(position, "Travel mode (not preserved)", LabelStyle::SectionHeading);
             addToggle(position, "Off", 3);
             addToggle(position, "Slow correction", 3);
             addToggle(position, "Fast correction", 3);
