@@ -3,6 +3,7 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
+    headPanel.setListener(this);
     headPanel.setTopLeftPosition(8, 8);
     addAndMakeVisible(headPanel);
     setSize(headPanel.getWidth()+16, headPanel.getHeight()+16);
