@@ -8,7 +8,7 @@
 
 namespace HeadPanel
 {
-    class HeadButton: public Component, private Timer
+    class HeadButton: public juce::Component, private juce::Timer
     {
     public:
         class Listener
@@ -24,22 +24,22 @@ namespace HeadPanel
             setSize(40, 40);
         }
 
-        void paint(Graphics& g) override
+        void paint(juce::Graphics& g) override
         {
             if (isHovering && !isSelected)
             {
-                g.setColour(Colour(0x20ffffff));
+                g.setColour(juce::Colour(0x20ffffff));
                 g.fillRect(g.getClipBounds());
             }
-            /**/ if (isSelected) { g.setColour(Colours::white); }
-            else if (isHovering) { g.setColour(Colour(0x80ffffff)); }
-            else                 { g.setColour(Colour(0x40ffffff)); }
-            g.drawImageWithin(im, 0, 0, 40, 40, RectanglePlacement());
+            /**/ if (isSelected) { g.setColour(juce::Colours::white); }
+            else if (isHovering) { g.setColour(juce::Colour(0x80ffffff)); }
+            else                 { g.setColour(juce::Colour(0x40ffffff)); }
+            g.drawImageWithin(im, 0, 0, 40, 40, juce::RectanglePlacement());
         }
 
         //----------------------------------------------------------------------
 
-        void mouseEnter(const MouseEvent& /*event*/) override
+        void mouseEnter(const juce::MouseEvent& /*event*/) override
         {
             isHovering = true;
             flagRepaint();
@@ -47,7 +47,7 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void mouseExit(const MouseEvent& /*event*/) override
+        void mouseExit(const juce::MouseEvent& /*event*/) override
         {
             isHovering = false;
             flagRepaint();
@@ -55,7 +55,7 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void mouseUp(const MouseEvent& /*event*/) override
+        void mouseUp(const juce::MouseEvent& /*event*/) override
         {
             isHovering = false;
             flagRepaint();
@@ -63,14 +63,14 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void mouseDown(const MouseEvent& /*event*/) override
+        void mouseDown(const juce::MouseEvent& /*event*/) override
         {
             l->headButtonSelect(listenerIndex);
         }
 
         //----------------------------------------------------------------------
 
-        void setImage(const Image& image)
+        void setImage(const juce::Image& image)
         {
             im = image;
             im.duplicateIfShared();
@@ -98,7 +98,7 @@ namespace HeadPanel
             stopTimer();
             if (doRepaint)
             {
-                MessageManagerLock mml;
+                juce::MessageManagerLock mml;
                 doRepaint = false;
                 repaint();
             }
@@ -108,7 +108,7 @@ namespace HeadPanel
 
     private:
         Listener* l;
-        Image im;
+        juce::Image im;
         int listenerIndex;
         bool isSelected, isHovering, doRepaint;
 

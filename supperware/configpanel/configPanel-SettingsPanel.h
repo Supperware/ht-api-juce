@@ -14,7 +14,7 @@ namespace ConfigPanel
             BasePanel(""),
             td(trackerDriver)
         {
-            Point<int> position(4, yOrigin());
+            juce::Point<int> position(4, yOrigin());
             addLabel(position, "Chirality", LabelStyle::SectionHeading);
             addToggle(position, "Cable on left", 1);
             addToggle(position, "Cable on right", 1);
@@ -24,7 +24,7 @@ namespace ConfigPanel
             addToggle(position, "Slow central pull", 2);
 
             position.addXY(0,2);
-            Point<int> rightPos = position;
+            juce::Point<int> rightPos = position;
             rightPos.addXY(132, 26);
             addTextButton(position, "Calibrate compass", 172);
             addLabel(rightPos, "", LabelStyle::SubData);
@@ -77,7 +77,7 @@ namespace ConfigPanel
             if (timerID == 1)
             {
                 setCompassLabel();
-                MultiTimer::stopTimer(timerID);
+                juce::MultiTimer::stopTimer(timerID);
             }
             BasePanel::timerCallback(timerID);
         }
@@ -113,20 +113,20 @@ namespace ConfigPanel
 
         void trackUpdatedState(bool rightEarChirality, bool compassOn, Tracker::TravelMode travelMode)
         {
-            MessageManagerLock mml;
+            juce::MessageManagerLock mml;
             bool isConnected = td.isConnected();
             setEnabled(isConnected);
             if(isConnected)
             {
-                toggleButtons[0]->setToggleState(!rightEarChirality, dontSendNotification);
-                toggleButtons[1]->setToggleState(rightEarChirality, dontSendNotification);
+                toggleButtons[0]->setToggleState(!rightEarChirality, juce::dontSendNotification);
+                toggleButtons[1]->setToggleState(rightEarChirality, juce::dontSendNotification);
                 //
-                toggleButtons[2]->setToggleState(compassOn, dontSendNotification);
-                toggleButtons[3]->setToggleState(!compassOn, dontSendNotification);
+                toggleButtons[2]->setToggleState(compassOn, juce::dontSendNotification);
+                toggleButtons[3]->setToggleState(!compassOn, juce::dontSendNotification);
                 //
-                toggleButtons[4]->setToggleState(travelMode == Tracker::TravelMode::Off, dontSendNotification);
-                toggleButtons[5]->setToggleState(travelMode == Tracker::TravelMode::Slow, dontSendNotification);
-                toggleButtons[6]->setToggleState(travelMode == Tracker::TravelMode::Fast, dontSendNotification);
+                toggleButtons[4]->setToggleState(travelMode == Tracker::TravelMode::Off, juce::dontSendNotification);
+                toggleButtons[5]->setToggleState(travelMode == Tracker::TravelMode::Slow, juce::dontSendNotification);
+                toggleButtons[6]->setToggleState(travelMode == Tracker::TravelMode::Fast, juce::dontSendNotification);
             }
             flagRepaint();
         }
@@ -141,8 +141,8 @@ namespace ConfigPanel
 
         void setCompassLabel()
         {
-            MessageManagerLock mml; // needed for setEnabled
-            String labelText = "";
+            juce::MessageManagerLock mml; // needed for setEnabled
+            juce::String labelText = "";
             if (td.isConnected())
             {
                 if (compassState == Tracker::CompassState::Calibrating)    labelText = "CALIBRATING";
@@ -151,7 +151,7 @@ namespace ConfigPanel
                 else if (compassState == Tracker::CompassState::GoodData)  labelText = "GOOD DATA";
                 else if (compassState == Tracker::CompassState::BadData)   labelText = "BAD DATA";
             }
-            labels[2]->setText(labelText, dontSendNotification);
+            labels[2]->setText(labelText, juce::dontSendNotification);
             textButtons[0]->setEnabled(compassState != Tracker::CompassState::Calibrating);
         }
     };

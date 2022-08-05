@@ -12,10 +12,10 @@ namespace Midi
     enum class State { Unavailable, Available, Bootloader, Connected };
     enum class Connection { AsBootloader, AsDevice, AsEither };
 
-    class MidiDuplex : public MidiInputCallback, protected Timer
+    class MidiDuplex : public juce::MidiInputCallback, protected juce::Timer
     {
     public:
-        MidiDuplex(const String deviceName, const String bootloaderName) :
+        MidiDuplex(const juce::String deviceName, const juce::String bootloaderName) :
             midiOut(nullptr),
             midiIn(nullptr),
             device(deviceName),
@@ -106,8 +106,8 @@ namespace Midi
             
             if ((outputIndex >= 0) && (inputIndex >= 0))
             {
-                midiOut = MidiOutput::openDevice(outputIndex);
-                midiIn  = MidiInput::openDevice(inputIndex, this);
+                midiOut = juce::MidiOutput::openDevice(outputIndex);
+                midiIn  = juce::MidiInput::openDevice(inputIndex, this);
                 if (midiOut && midiIn)
                 {
                     midiIn->start();
@@ -137,7 +137,7 @@ namespace Midi
 
         // ------------------------------------------------------------------------
 
-        void sendMessage(const MidiMessage& message)
+        void sendMessage(const juce::MidiMessage& message)
         {
             if (midiOut)
             {
@@ -147,7 +147,7 @@ namespace Midi
 
         // ------------------------------------------------------------------------
 
-        void handleIncomingMidiMessage(MidiInput* /*source*/, const MidiMessage& message)
+        void handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juce::MidiMessage& message)
         {
             if (autoDisconnect)
             {
@@ -201,16 +201,16 @@ namespace Midi
         // ------------------------------------------------------------------------
 
     protected:
-        std::unique_ptr<MidiOutput> midiOut;
-        std::unique_ptr<MidiInput> midiIn;
-        String device, bootloader;
+        std::unique_ptr<juce::MidiOutput> midiOut;
+        std::unique_ptr<juce::MidiInput> midiIn;
+        juce::String device, bootloader;
         State connectionState;
         bool autoReconnect, autoDisconnect;
 
         // ------------------------------------------------------------------------
 
-        virtual void handleSysEx(const uint8* /*buffer*/, const size_t /*numBytes*/) {}
-        virtual void handleMidi(const MidiMessage& /*message*/) {}
+        virtual void handleSysEx(const uint8_t* /*buffer*/, const size_t /*numBytes*/) {}
+        virtual void handleMidi(const juce::MidiMessage& /*message*/) {}
         virtual void connectionStateChanged() {}
         
         // ------------------------------------------------------------------------
@@ -228,9 +228,9 @@ namespace Midi
         
         void getIndexes(bool& wouldConnectToBootloader, int& outputIndex, int& inputIndex) const
         {
-            StringArray sa;
+            juce::StringArray sa;
             int index;
-            sa = MidiOutput::getDevices();
+            sa = juce::MidiOutput::getDevices();
             index = sa.indexOf(device);
             if (index >= 0)
             {
@@ -253,7 +253,7 @@ namespace Midi
 
             if (outputIndex >= 0)
             {
-                sa = MidiInput::getDevices();
+                sa = juce::MidiInput::getDevices();
                 if (wouldConnectToBootloader)
                 {
                     inputIndex = sa.indexOf(bootloader);

@@ -10,13 +10,13 @@ namespace ConfigPanel
 {
     enum class LabelStyle { SectionHeading, Description, Data, SubData };
 
-    class BasePanel : public Component, public MultiTimer,
-        private Button::Listener, private ComboBox::Listener
+    class BasePanel : public juce::Component, public juce::MultiTimer,
+        private juce::Button::Listener, private juce::ComboBox::Listener
     {
     public:
         static constexpr int LabelWidth { 256 }; // window width is derived from LabelWidth
 
-        BasePanel(String titleText) :
+        BasePanel(juce::String titleText) :
             Component(),
             labels(), textButtons(), toggleButtons(), comboBoxes(),
             title(titleText), lookAndFeelRadio()
@@ -41,16 +41,16 @@ namespace ConfigPanel
 
         // ---------------------------------------------------------------------
         
-        void buttonClicked(Button* button) override
+        void buttonClicked(juce::Button* button) override
         {
-            TextButton* textB = dynamic_cast<TextButton*>(button);
+            juce::TextButton* textB = dynamic_cast<juce::TextButton*>(button);
             if (textB)
             {
                 click(true, textButtons.indexOf(textB), false);
             }
             else
             {
-                ToggleButton* toggleB = dynamic_cast<ToggleButton*>(button);
+                juce::ToggleButton* toggleB = dynamic_cast<juce::ToggleButton*>(button);
                 if (toggleB)
                 {
                     click(false, toggleButtons.indexOf(toggleB), toggleB->getToggleState());
@@ -60,7 +60,7 @@ namespace ConfigPanel
 
         // ---------------------------------------------------------------------
 
-        void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override
+        void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override
         {
             int cbIndex = comboBoxes.indexOf(comboBoxThatHasChanged);
             comboBox(cbIndex, comboBoxThatHasChanged->getSelectedItemIndex());
@@ -86,30 +86,30 @@ namespace ConfigPanel
             }
         }
 
-        void paint(Graphics& g) override
+        void paint(juce::Graphics& g) override
         {
             if (!title.isEmpty())
             {
                 // draw title
-                g.setColour(Colour(0xff0c0c0c));
+                g.setColour(juce::Colour(0xff0c0c0c));
                 g.fillRect(0, 2, LabelWidth, 21);
                 g.setColour(TitleLabel);
-                g.setFont(Font(16.0, Font::plain));
-                g.drawText(title, 8, 4, 200, 200, Justification::topLeft);
+                g.setFont(juce::Font(16.0, juce::Font::plain));
+                g.drawText(title, 8, 4, 200, 200, juce::Justification::topLeft);
             }
         }
 
         // ------------------------------------------------------------------------
 
 protected:
-        OwnedArray<Label> labels;
-        OwnedArray<TextButton> textButtons;
-        OwnedArray<ToggleButton> toggleButtons;
-        OwnedArray<ComboBox> comboBoxes;
+        juce::OwnedArray<juce::Label> labels;
+        juce::OwnedArray<juce::TextButton> textButtons;
+        juce::OwnedArray<juce::ToggleButton> toggleButtons;
+        juce::OwnedArray<juce::ComboBox> comboBoxes;
 
         // ------------------------------------------------------------------------
 
-        int addLabel(Point<int>& topLeft, const String text, const LabelStyle style)
+        int addLabel(juce::Point<int>& topLeft, const juce::String text, const LabelStyle style)
         {
             int styleIndex;
             switch (style)
@@ -121,16 +121,16 @@ protected:
             }
 
             const float LabelFontSize[4] = { 15.5f, 14.5f, 16.0f, 16.0f };
-            const int LabelFontStyle[4] = { Font::FontStyleFlags::bold, 0, 0, 0 };
-            const Colour LabelColour[4] = { SectionLabel, Colour(0xff808186), Colour(0xffd8d8d8), Colour(0xffa4a5a8)};
+            const int LabelFontStyle[4] = { juce::Font::FontStyleFlags::bold, 0, 0, 0 };
+            const juce::Colour LabelColour[4] = { SectionLabel, juce::Colour(0xff808186), juce::Colour(0xffd8d8d8), juce::Colour(0xffa4a5a8)};
             const int LineHeight[4] = { 28, 24, 24, 24 };
 
             int index = labels.size();
-            Label* lb = labels.add(new Label(text, text));
+            juce::Label* lb = labels.add(new juce::Label(text, text));
             lb->setTopLeftPosition(topLeft);
             lb->setSize(LabelWidth, LineHeight[styleIndex]);
-            lb->setFont(Font(LabelFontSize[styleIndex], LabelFontStyle[styleIndex]));
-            lb->setColour(Label::ColourIds::textColourId, LabelColour[styleIndex]);
+            lb->setFont(juce::Font(LabelFontSize[styleIndex], LabelFontStyle[styleIndex]));
+            lb->setColour(juce::Label::ColourIds::textColourId, LabelColour[styleIndex]);
             topLeft.y += LineHeight[styleIndex] + 3;
             addAndMakeVisible(lb);
             return index;
@@ -138,11 +138,11 @@ protected:
 
         // ------------------------------------------------------------------------
 
-        int addTextButton(Point<int>& topLeft, const String text, const int width)
+        int addTextButton(juce::Point<int>& topLeft, const juce::String text, const int width)
         {
             constexpr int ButtonHeight { 24 };
             int index = textButtons.size();
-            TextButton* tb = textButtons.add(new TextButton(text));
+            juce::TextButton* tb = textButtons.add(new juce::TextButton(text));
             tb->setTopLeftPosition(topLeft.translated(Indent + 10, 2));
             tb->setSize(width, ButtonHeight);
             tb->addListener(this);
@@ -153,14 +153,14 @@ protected:
 
         // ------------------------------------------------------------------------
 
-        int addToggle(Point<int>& topLeft, const String text, const int radioGroupID = -1)
+        int addToggle(juce::Point<int>& topLeft, const juce::String text, const int radioGroupID = -1)
         {
             constexpr int ToggleHeight { 22 };
             int index = toggleButtons.size();
-            ToggleButton* tb = toggleButtons.add(new ToggleButton(text));
+            juce::ToggleButton* tb = toggleButtons.add(new juce::ToggleButton(text));
             if (radioGroupID >= 0)
             {
-                tb->setRadioGroupId(radioGroupID, dontSendNotification);
+                tb->setRadioGroupId(radioGroupID, juce::dontSendNotification);
                 tb->setLookAndFeel(&lookAndFeelRadio);
             }
             tb->setTopLeftPosition(topLeft.translated(Indent, 0));
@@ -173,11 +173,11 @@ protected:
 
         // ------------------------------------------------------------------------
 
-        int addComboBox(Point<int>& topLeft, const StringArray& text)
+        int addComboBox(juce::Point<int>& topLeft, const juce::StringArray& text)
         {
             constexpr int ComboBoxHeight { 24 };
             int index = comboBoxes.size();
-            ComboBox* cb = comboBoxes.add(new ComboBox());
+            juce::ComboBox* cb = comboBoxes.add(new juce::ComboBox());
             cb->setEditableText(false);
             cb->addItemList(text, 1);
             cb->setTopLeftPosition(topLeft.translated(Indent - 4, 0));
@@ -202,9 +202,9 @@ protected:
         // ------------------------------------------------------------------------
 
     protected:
-        String title;
-        const Colour TitleLabel = Colour(0xff28789c);
-        const Colour SectionLabel = Colour(0xff529aca);
+        juce::String title;
+        const juce::Colour TitleLabel = juce::Colour(0xff28789c);
+        const juce::Colour SectionLabel = juce::Colour(0xff529aca);
 
         static constexpr int Indent { 18 };
 
