@@ -14,7 +14,7 @@ namespace HeadPanel
         
         struct PointItem
         {
-            PointItem(float _x, float _y, float _z, Colour _colour, bool _closeLine):
+            PointItem(float _x, float _y, float _z, juce::Colour _colour, bool _closeLine):
                 x(_x),
                 y(_y),
                 z(_z),
@@ -25,7 +25,7 @@ namespace HeadPanel
             {}
 
             float x, y, z;
-            Colour colour;
+            juce::Colour colour;
             signed int linkForwards, linkBackwards;
             bool closeLine;
         };
@@ -49,7 +49,7 @@ namespace HeadPanel
 
         // ------------------------------------------------------------------------
 
-        void addPoint(const float x, const float y, float z, const Colour colour, const bool closeLine)
+        void addPoint(const float x, const float y, float z, const juce::Colour colour, const bool closeLine)
         {
             points.push_back(PointItem(x, y, z, colour, closeLine));
             PointItem* p = &points[points.size() - 1];
@@ -77,7 +77,7 @@ namespace HeadPanel
 
         // ------------------------------------------------------------------------
 
-        void paint(Graphics& g, const int xMid, const int yMid, const float scale, const float lineThickness) const
+        void paint(juce::Graphics& g, const int xMid, const int yMid, const float scale, const float lineThickness) const
         {
             int index = rearItem;
             while (index != -1)

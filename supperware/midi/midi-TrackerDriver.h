@@ -66,7 +66,7 @@ namespace Midi
             {
                 isTrackerOn = false;
                 size_t numBytes = tracker.turnOffMessage(midiBuffer);
-                sendMessage(MidiMessage(midiBuffer, (int)numBytes));
+                sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
             }
         }
 
@@ -86,7 +86,7 @@ namespace Midi
                 isQuaternion = isQuaternionMode;
                 isTrackerOn = true;
                 size_t numBytes = tracker.turnOnMessage(midiBuffer, isQuaternion, is100Hz);
-                sendMessage(MidiMessage(midiBuffer, (int)numBytes));
+                sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
             }
         }
 
@@ -96,7 +96,7 @@ namespace Midi
         void zero()
         {
             size_t numBytes = tracker.zeroMessage(midiBuffer);
-            sendMessage(MidiMessage(midiBuffer, (int)numBytes));
+            sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
         }
 
         // ------------------------------------------------------------------------
@@ -105,7 +105,7 @@ namespace Midi
         void setChirality(const bool isRightEarChirality)
         {
             size_t numBytes = tracker.chiralityMessage(midiBuffer, isRightEarChirality);
-            sendMessage(MidiMessage(midiBuffer, (int)numBytes));
+            sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
         }
         
         // ------------------------------------------------------------------------
@@ -114,7 +114,7 @@ namespace Midi
         void setTravelMode(const Tracker::TravelMode newTravelMode)
         {
             size_t numBytes = tracker.travelModeMessage(midiBuffer, newTravelMode);
-            sendMessage(MidiMessage(midiBuffer, (int)numBytes));
+            sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
         }
 
         // ------------------------------------------------------------------------
@@ -124,7 +124,7 @@ namespace Midi
         void setCompass(bool compassShouldBeOn)
         {
             size_t numBytes = tracker.compassMessage(midiBuffer, compassShouldBeOn);
-            sendMessage(MidiMessage(midiBuffer, (int)numBytes));
+            sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
         }
         
         // ------------------------------------------------------------------------
@@ -133,13 +133,13 @@ namespace Midi
         void calibrateCompass()
         {
             size_t numBytes = tracker.calibrateCompassMessage(midiBuffer);
-            sendMessage(MidiMessage(midiBuffer, (int)numBytes));
+            sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
         }
 
         // ------------------------------------------------------------------------
 
     protected:
-        virtual void handleOtherSysEx(const uint8* /*buffer*/, const size_t /*numBytes*/) {}
+        virtual void handleOtherSysEx(const uint8_t* /*buffer*/, const size_t /*numBytes*/) {}
 
         // ------------------------------------------------------------------------
 
@@ -160,10 +160,10 @@ namespace Midi
                 if (isTrackerOn)
                 {
                     size_t numBytes = tracker.turnOnMessage(midiBuffer, isQuaternion, is100Hz);
-                    sendMessage(MidiMessage(midiBuffer, (int)numBytes));
+                    sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
                 }
                 size_t numBytes = tracker.readbackMessage(midiBuffer);
-                sendMessage(MidiMessage(midiBuffer, (int)numBytes));
+                sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
             }
             l->trackerMidiConnectionChanged(connectionState);
         }
@@ -173,7 +173,7 @@ namespace Midi
     private:
         Listener* l;
         Tracker tracker;
-        Vector3D<float> position;
+        juce::Vector3D<float> position;
         uint8_t midiBuffer[16];
         bool isQuaternion;
         bool is100Hz;

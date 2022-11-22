@@ -11,7 +11,7 @@ namespace HeadPanel
     /** Component that manages head tracker settings, disconnection/reconnection, and shows 
       * instantaneous head angle. Also owns Midi::Tracker and SBR::HeadMatrix objects, which
       * are useful everywhere else. */
-    class HeadPanel: public Component, Timer, Midi::TrackerDriver::Listener, HeadButton::Listener
+    class HeadPanel: public juce::Component, juce::Timer, Midi::TrackerDriver::Listener, HeadButton::Listener
 
     {
     public:
@@ -33,8 +33,8 @@ namespace HeadPanel
             doRepaint(false),
             midiState(Midi::State::Unavailable)
         {
-            MemoryInputStream mis(BinaryData::mini_tile_png, BinaryData::mini_tile_pngSize, false);
-            Image im = ImageFileFormat::loadFrom(mis);
+            juce::MemoryInputStream mis(BinaryData::mini_tile_png, BinaryData::mini_tile_pngSize, false);
+            juce::Image im = juce::ImageFileFormat::loadFrom(mis);
 
             setSize(148, 104);
             doButton(hbConfigure, im, 0, 2, 6);
@@ -58,7 +58,7 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void paint(Graphics& g) override
+        void paint(juce::Graphics& g) override
         {
             //g.setColour(Colour(0xff404040));
             //g.drawRect(g.getClipBounds(), 1.0f);
@@ -131,7 +131,7 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void mouseDoubleClick(const MouseEvent& /*event*/) override
+        void mouseDoubleClick(const juce::MouseEvent& /*event*/) override
         {
             trackerDriver.zero();
         }
@@ -143,9 +143,9 @@ namespace HeadPanel
             if (!index)
             {
                 // settings button
-                DialogWindow::LaunchOptions lo;
+                juce::DialogWindow::LaunchOptions lo;
                 lo.content.set(&settingsPanel, false);
-                lo.dialogBackgroundColour = Colour(0xff181818);
+                lo.dialogBackgroundColour = juce::Colour(0xff181818);
                 lo.dialogTitle = "Head Tracker Settings";
                 lo.escapeKeyTriggersCloseButton = true;
                 lo.resizable = false;
@@ -170,17 +170,17 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void doButton(HeadButton& b, Image& masterImage, int imageIndex, int x, int y)
+        void doButton(HeadButton& b, juce::Image& masterImage, int imageIndex, int x, int y)
         {
             double dpi = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->dpi;
-            Image subImage;
+            juce::Image subImage;
             if (dpi > 128.0)
             {
-                subImage = masterImage.getClippedImage(Rectangle<int>(40 + 120 * imageIndex, 0, 120, 120));
+                subImage = masterImage.getClippedImage(juce::Rectangle<int>(40 + 120 * imageIndex, 0, 120, 120));
             }
             else
             {
-                subImage = masterImage.getClippedImage(Rectangle<int>(0, 40 * imageIndex, 40, 40));
+                subImage = masterImage.getClippedImage(juce::Rectangle<int>(0, 40 * imageIndex, 40, 40));
             }
 
             b.setTopLeftPosition(x, y);
@@ -195,7 +195,7 @@ namespace HeadPanel
             stopTimer();
             if (doRepaint)
             {
-                MessageManagerLock mml;
+                juce::MessageManagerLock mml;
                 doRepaint = false;
                 repaint();
             }

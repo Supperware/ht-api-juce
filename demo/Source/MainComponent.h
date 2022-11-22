@@ -1,7 +1,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-using namespace juce;
 
 #include "HeadMatrix.h"
 #include "Tracker.h"
