@@ -1,7 +1,7 @@
 /*
  * Head tracker configuration panels
  * Handles common activities concerning configuration windows
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once

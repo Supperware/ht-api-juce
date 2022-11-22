@@ -42,7 +42,7 @@ namespace HeadPanel
         void mouseEnter(const juce::MouseEvent& /*event*/) override
         {
             isHovering = true;
-            flagRepaint();
+            repaintAsync();
         }
 
         //----------------------------------------------------------------------
@@ -50,7 +50,7 @@ namespace HeadPanel
         void mouseExit(const juce::MouseEvent& /*event*/) override
         {
             isHovering = false;
-            flagRepaint();
+            repaintAsync();
         }
 
         //----------------------------------------------------------------------
@@ -58,7 +58,7 @@ namespace HeadPanel
         void mouseUp(const juce::MouseEvent& /*event*/) override
         {
             isHovering = false;
-            flagRepaint();
+            repaintAsync();
         }
 
         //----------------------------------------------------------------------
@@ -81,7 +81,7 @@ namespace HeadPanel
         void setSelected(const bool shouldBeSelected)
         {
             isSelected = shouldBeSelected;
-            flagRepaint();
+            repaintAsync();
         }
 
         //----------------------------------------------------------------------
@@ -98,7 +98,6 @@ namespace HeadPanel
             stopTimer();
             if (doRepaint)
             {
-                juce::MessageManagerLock mml;
                 doRepaint = false;
                 repaint();
             }
@@ -112,10 +111,10 @@ namespace HeadPanel
         int listenerIndex;
         bool isSelected, isHovering, doRepaint;
 
-        void flagRepaint()
+        void repaintAsync()
         {
             doRepaint = true;
-            startTimer(20);
+            startTimerHz(60);
         }
     };
 };

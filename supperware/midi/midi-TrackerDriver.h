@@ -25,14 +25,14 @@ namespace Midi
             virtual void trackerConnectionChanged(const Tracker::State& /*state*/) {}
 
             /** Called when the head tracker's connection state or its status data is changed */
-            virtual void trackerMidiConnectionChanged(const Midi::State /*state*/) {}
+            virtual void trackerMidiConnectionChanged(const Midi::State& /*state*/) {}
         };
 
         /** You must nominate a Tracker::Listener in the constructor. This is usually the parent class. */
         TrackerDriver() :
             MidiDuplex("Head Tracker", "Supperware Bootloader"),
             tracker(this),
-            angleMode(Tracker::AngleMode::Quaternion),
+            currentAngleMode(Tracker::AngleMode::Quaternion),
             is100Hz(false),
             isTrackerOn(false)
         {}
@@ -113,12 +113,14 @@ namespace Midi
             {
                 connect();
             }
+
+            currentAngleMode = isQuaternionMode ? Tracker::AngleMode::Quaternion : Tracker::AngleMode::YPR;
+
             if (connectionState == State::Connected)
             {
                 is100Hz = is100HzMode;
-                angleMode = isQuaternionMode ? Tracker::AngleMode::Quaternion : Tracker::AngleMode::YPR;
                 isTrackerOn = true;
-                size_t numBytes = tracker.turnOnMessage(midiBuffer, angleMode, is100Hz);
+                size_t numBytes = tracker.turnOnMessage(midiBuffer, currentAngleMode, is100Hz);
                 sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
             }
         }
@@ -176,11 +178,11 @@ namespace Midi
 
         // ------------------------------------------------------------------------
 
-        void handleSysEx(const uint8_t* buffer, const size_t numBytes) override
+        void handleSysEx(const uint8_t* data, const size_t numBytes) override
         {
-            if (!tracker.processSysex(buffer, numBytes))
+            if (!tracker.processSysex(data, numBytes))
             {
-                handleOtherSysEx(buffer, numBytes);
+                handleOtherSysEx(data, numBytes);
             }
         }
 
@@ -190,11 +192,6 @@ namespace Midi
         {
             if (connectionState == State::Connected)
             {
-                if (isTrackerOn)
-                {
-                    size_t numBytes = tracker.turnOnMessage(midiBuffer, angleMode, is100Hz);
-                    sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
-                }
                 size_t numBytes = tracker.readbackMessage(midiBuffer);
                 sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
             }
@@ -211,7 +208,7 @@ namespace Midi
         Tracker tracker;
         juce::Vector3D<float> position;
         uint8_t midiBuffer[16];
-        Tracker::AngleMode angleMode;
+        Tracker::AngleMode currentAngleMode;
         bool is100Hz;
         bool isTrackerOn;
     };

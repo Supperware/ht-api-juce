@@ -12,7 +12,7 @@ namespace Midi
     enum class State { Unavailable, Available, Bootloader, Connected };
     enum class Connection { AsBootloader, AsDevice, AsEither };
 
-    class MidiDuplex : public juce::MidiInputCallback, protected juce::Timer
+    class MidiDuplex : public juce::MidiInputCallback, protected juce::MultiTimer
     {
     public:
         MidiDuplex(const juce::String deviceName, const juce::String bootloaderName) :
@@ -24,11 +24,12 @@ namespace Midi
             autoReconnect(false),
             autoDisconnect(true)
         {
-            // this timer doesn't ever stop:
-            // it handles unavailable/available signalling even when automatic modes
-            // are switched off.
-            startTimer(TimeoutMilliseconds);
-        }
+            // This timer doesn't ever stop: it handles unavailable/available signalling
+            // even when automatic modes are switched off.
+            // we use MultiTimer here because it's often necessary to use other timers
+            // in inherited classes.
+            startTimer(0, TimeoutMilliseconds);
+         }
 
         // ------------------------------------------------------------------------
 
@@ -79,7 +80,7 @@ namespace Midi
         {
             // reconnects when the connection drops
             autoReconnect = automaticReconnect;
-            startTimer(TimeoutMilliseconds);
+            startTimer(0, TimeoutMilliseconds);
         }
         
         // ------------------------------------------------------------------------
@@ -92,7 +93,7 @@ namespace Midi
         {
             // disconnects when inbound traffic stops
             autoDisconnect = automaticDisconnect;
-            startTimer(TimeoutMilliseconds);
+            startTimer(0, TimeoutMilliseconds);
         }
 
         // ------------------------------------------------------------------------
@@ -147,11 +148,11 @@ namespace Midi
 
         // ------------------------------------------------------------------------
 
-        void handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juce::MidiMessage& message)
+        void handleIncomingMidiMessage(juce::MidiInput* /*source*/, const juce::MidiMessage& message) override
         {
             if (autoDisconnect)
             {
-                startTimer(TimeoutMilliseconds);
+                startTimer(0, TimeoutMilliseconds);
             }
 
             if (message.isSysEx())
@@ -168,8 +169,10 @@ namespace Midi
 
         // ------------------------------------------------------------------------
 
-        void timerCallback()
+        void timerCallback(int timerID) override
         {
+            if (timerID != 0) return;
+
             if (connectionState == State::Connected)
             {
                 // hit this timer because data flow has stopped
@@ -256,7 +259,7 @@ namespace Midi
             inputIdentifier = juce::String();
             if (outputIdentifier.isNotEmpty())
             {
-                const juce::Array<juce::MidiDeviceInfo>& inInfo = juce::MidiOutput::getAvailableDevices();
+                const juce::Array<juce::MidiDeviceInfo>& inInfo = juce::MidiInput::getAvailableDevices();
                 if (wouldConnectToBootloader)
                 {
                     inputIdentifier = findIdentifierInMidiInfo(inInfo, bootloader);

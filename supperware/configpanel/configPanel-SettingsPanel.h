@@ -1,6 +1,6 @@
 /*
  * Head tracker configuration panels
- * Copyright 2021 Supperware Ltd.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once
@@ -67,7 +67,7 @@ namespace ConfigPanel
 
         // ---------------------------------------------------------------------
 
-        void trackerMidiConnectionChanged(Midi::State /*state*/) override
+        void trackerMidiConnectionChanged(const Midi::State& /*state*/) override
         {
             setEnabled(td.isConnected());
             refreshAsync();

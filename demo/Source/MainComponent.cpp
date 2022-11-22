@@ -31,7 +31,7 @@ void MainComponent::resized()
     // update their positions.
 }
 
-void MainComponent::trackerChanged(const HeadMatrix& headMatrix)
+void MainComponent::trackerChanged(const HeadMatrix& /*headMatrix*/)
 {
     // headMatrix.transform and headMatrix.transformTranspose can be used here
     // to rotate an object.

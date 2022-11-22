@@ -9,7 +9,7 @@
 class Tracker
 {
 public:
-    enum UpdateMode { DontUpdateState, UpdateWithoutNotifying, NotifyListener };
+    enum class UpdateMode { DontUpdateState, UpdateWithoutNotifying, NotifyListener };
     enum class AngleMode { YPR, Quaternion, Matrix };
     enum class CompassState { Off, Calibrating, Succeeded, Failed, GoodData, BadData };
     enum class TravelMode { Off, Slow, Fast };
@@ -75,7 +75,7 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** there can be only one listener */
+    /** There can be only one listener */
     void setListener(Listener* listener)
     {
         l = listener;
@@ -127,9 +127,10 @@ public:
 
     /** Format a System Exclusive message to determine whether the cable should be
         over the left or right ear. */
-    size_t chiralityMessage(uint8_t* buffer, bool isRightEarChirality, UpdateMode updateMode = UpdateWithoutNotifying)
+    size_t chiralityMessage(uint8_t* buffer, bool isRightEarChirality,
+        UpdateMode updateMode = UpdateMode::UpdateWithoutNotifying)
     {
-        if ((updateMode != DontUpdateState) && (state.rightEarChirality != isRightEarChirality))
+        if ((updateMode != UpdateMode::DontUpdateState) && (state.rightEarChirality != isRightEarChirality))
         {
             state.rightEarChirality = isRightEarChirality;
             notifyIfNecessary(updateMode);
@@ -141,9 +142,10 @@ public:
 
     /** Format a System Exclusive message to set the automatic zeroing [travel] mode
         (works only when the compass is off). */
-    size_t travelModeMessage(uint8_t* buffer, const TravelMode newTravelMode, UpdateMode updateMode = UpdateWithoutNotifying)
+    size_t travelModeMessage(uint8_t* buffer, const TravelMode newTravelMode,
+        UpdateMode updateMode = UpdateMode::UpdateWithoutNotifying)
     {
-        if ((updateMode != DontUpdateState) && (state.travelMode != newTravelMode))
+        if ((updateMode != UpdateMode::DontUpdateState) && (state.travelMode != newTravelMode))
         {
             state.travelMode = newTravelMode;
             notifyIfNecessary(updateMode);
@@ -202,7 +204,10 @@ public:
 
     /** The buffer passed to this call and the byte count should be stripped of
         the leading 0xF0 and trailing 0xF7. Returns true if we have handled the 
-        message. */
+        message.
+        File transfer messages, used in upgrades, are handled outside this
+        routine. */
+
     bool processSysex(const uint8_t* buffer, size_t numBytes)
     {
         if (sysexMatch(buffer, numBytes, 11, 0x40, 0x00))
@@ -229,6 +234,7 @@ public:
             {
                 matrix[i] = bytes211ToFloat(buffer + 5 + 2*i);
             }
+
             if (l) l->trackerOrientationM(matrix);
             return true;
         }
@@ -295,7 +301,7 @@ private:
 
     void notifyIfNecessary(UpdateMode updateMode)
     {
-        if ((updateMode == NotifyListener) && l)
+        if ((updateMode == UpdateMode::NotifyListener) && l)
         {
             l->trackerConnectionChanged(state);
         }
