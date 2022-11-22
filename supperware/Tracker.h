@@ -55,7 +55,7 @@ public:
         virtual void trackerCompassStateChanged(CompassState /*compassState*/) {}
 
         /** Called when the head tracker's connection state or its status data is changed */
-        virtual void trackerConnectionChanged(const State& /*state*/) {}
+        virtual void trackerConnectionChanged(State /*state*/) {}
 
         /** Called when the gyroscope calibration has finished */
         virtual void trackerGyroCalibrated() {}
