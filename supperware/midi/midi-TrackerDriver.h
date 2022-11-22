@@ -68,7 +68,7 @@ namespace Midi
                 l->trackerCompassStateChanged(compassState);
             }
         }
-        void trackerConnectionChanged(Tracker::State state) override
+        void trackerConnectionChanged(const Tracker::State& state) override
         {
             for (Listener* l: listeners)
             {
