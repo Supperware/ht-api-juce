@@ -10,6 +10,7 @@ class Tracker
 {
 public:
     enum UpdateMode { DontUpdateState, UpdateWithoutNotifying, NotifyListener };
+    enum class AngleMode { YPR, Quaternion, Matrix };
     enum class CompassState { Off, Calibrating, Succeeded, Failed, GoodData, BadData };
     enum class TravelMode { Off, Slow, Fast };
 
@@ -46,6 +47,8 @@ public:
         virtual void trackerOrientation(float /*yawRadian*/, float /*pitchRadian*/, float /*rollRadian*/) {}
         /** Quaternions. */
         virtual void trackerOrientationQ(float /*qw*/, float /*qx*/, float /*qy*/, float /*qz*/) {}
+        /** Rotation matrix. */
+        virtual void trackerOrientationM(Vector3D<float> /*x*/, Vector3D<float> /*y*/, Vector3D<float> /*z*/) {}
 
         /** Called when the compass state changes */
         virtual void trackerCompassStateChanged(CompassState /*compassState*/) {}
@@ -80,10 +83,9 @@ public:
     // ------------------------------------------------------------------------
 
     /** Format a System Exclusive message to turn on the head tracker,
-        and returns the size in bytes. If quaternionMode is false, the
-        yaw/pitch/roll callback will be used. If use100Hz is false, the
+        and returns the size in bytes. If use100Hz is false, the
         head tracker will respond at 50Hz. */
-    size_t turnOnMessage(uint8_t* buffer, bool quaternionMode, bool use100Hz) const
+    size_t turnOnMessage(uint8_t* buffer, AngleMode angleMode, bool use100Hz) const
     {
         constexpr int MessageLength = 12;
         supperwareSysex(buffer, MessageLength);
@@ -91,7 +93,12 @@ public:
         buffer[5] = 0x00; // - Parameter 0 : Sensor setup
         buffer[6] = (use100Hz) ? 0x28 : 0x08;
         buffer[7] = 0x01; // - Parameter 1 : Data output and formatting
-        buffer[8] = (quaternionMode) ? 0x05 : 0x01;
+        switch (angleMode)
+        {
+            case AngleMode::YPR:        buffer[9] = 0x01; break;
+            case AngleMode::Quaternion: buffer[9] = 0x05; break;
+            default:                    buffer[9] = 0x09;
+        }
         buffer[9] = 0x03; // - Parameter 3 : Magnetometer control (to set verbose)
         buffer[10] = 0x40;
         return MessageLength;
@@ -209,7 +216,22 @@ public:
             if (l) l->trackerOrientationQ(qw, qx, qy, qz);
             return true;
         }
-        else if (buffer[3] == 0x42 && (numBytes >= 6) && !(numBytes & 1))
+        if (sysexMatch(buffer, numBytes, 23, 0x40, 0x02))
+        {
+            Vector3D<float> x, y, z;
+            x.x = bytes211ToFloat(buffer + 5);
+            x.y = bytes211ToFloat(buffer + 7);
+            x.z = bytes211ToFloat(buffer + 9);
+            y.x = bytes211ToFloat(buffer + 11);
+            y.y = bytes211ToFloat(buffer + 13);
+            y.z = bytes211ToFloat(buffer + 15);
+            z.x = bytes211ToFloat(buffer + 17);
+            z.y = bytes211ToFloat(buffer + 19);
+            z.z = bytes211ToFloat(buffer + 21);
+            if (l) l->trackerOrientationM(x, y, z);
+            return true;
+        }
+        if ((buffer[3] == 0x42) && (numBytes >= 6) && !(numBytes & 1))
         {
             // readback; even number of bytes; at least 6.
             for (uint8_t i = 4; i < numBytes; i += 2)

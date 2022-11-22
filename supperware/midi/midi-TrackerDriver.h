@@ -20,9 +20,10 @@ namespace Midi
             /** Callbacks inherited from Tracker. */
             virtual void trackerOrientation(float /*yawRadian*/, float /*pitchRadian*/, float /*rollRadian*/) {}
             virtual void trackerOrientationQ(float /*qw*/, float /*qx*/, float /*qy*/, float /*qz*/) {}
+            virtual void trackerOrientationM(Vector3D<float> /*x*/, Vector3D<float> /*y*/, Vector3D<float> /*z*/) {}
             virtual void trackerCompassStateChanged(Tracker::CompassState /*compassState*/) {}
             virtual void trackerConnectionChanged(const Tracker::State& /*state*/) {}
-            
+
             /** Called when the head tracker's connection state or its status data is changed */
             virtual void trackerMidiConnectionChanged(const Midi::State /*state*/) {}
         };

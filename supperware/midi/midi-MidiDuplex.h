@@ -1,14 +1,14 @@
 /*
  * MIDI drivers
- * Container for JUCE MIDI input and output objects,
- * so MIDI traffic can more easily be administered in both directions
- * Copyright (c) 2021 Supperware Ltd.
+ * Copyright 2021 Supperware Ltd. All rights reserved.
  */
 
 #pragma once
 
 namespace Midi
 {
+    /** Manages input and output objects,
+        to control MIDI traffic to a device in both directions. */
     enum class State { Unavailable, Available, Bootloader, Connected };
     enum class Connection { AsBootloader, AsDevice, AsEither };
 
@@ -41,9 +41,9 @@ namespace Midi
 
         bool canConnect(const Connection option = Connection::AsEither) const
         {
-            int outputIndex, inputIndex;
+            String outputIdentifier, inputIdentifier;
             bool wouldConnectToBootloader;
-            getIndexes(wouldConnectToBootloader, outputIndex, inputIndex);
+            getIdentifiers(wouldConnectToBootloader, outputIdentifier, inputIdentifier);
             if ((option == Connection::AsDevice) && wouldConnectToBootloader)
             {
                 return false;
@@ -52,7 +52,7 @@ namespace Midi
             {
                 return false;
             }
-            return (outputIndex >= 0) && (inputIndex >= 0);
+            return outputIdentifier.isNotEmpty() && inputIdentifier.isNotEmpty();
         }
         
         // ------------------------------------------------------------------------
@@ -99,15 +99,15 @@ namespace Midi
 
         bool connect()
         {
-            int outputIndex, inputIndex;
-            bool connectingToBootloader;
-            getIndexes(connectingToBootloader, outputIndex, inputIndex);
+            String outputIdentifier, inputIdentifier;
+            bool connectingToBootloader = false;
+            getIdentifiers(connectingToBootloader, outputIdentifier, inputIdentifier);
             disconnect();
             
-            if ((outputIndex >= 0) && (inputIndex >= 0))
+            if (outputIdentifier.isNotEmpty() && inputIdentifier.isNotEmpty())
             {
-                midiOut = juce::MidiOutput::openDevice(outputIndex);
-                midiIn  = juce::MidiInput::openDevice(inputIndex, this);
+                midiOut = MidiOutput::openDevice(outputIdentifier);
+                midiIn  = MidiInput::openDevice(inputIdentifier, this);
                 if (midiOut && midiIn)
                 {
                     midiIn->start();
@@ -156,7 +156,7 @@ namespace Midi
 
             if (message.isSysEx())
             {
-                const uint8_t* m = message.getSysExData();
+                const uint8* m = message.getSysExData();
                 const size_t s = message.getSysExDataSize();
                 handleSysEx(m, s);
             }
@@ -209,8 +209,8 @@ namespace Midi
 
         // ------------------------------------------------------------------------
 
-        virtual void handleSysEx(const uint8_t* /*buffer*/, const size_t /*numBytes*/) {}
-        virtual void handleMidi(const juce::MidiMessage& /*message*/) {}
+        virtual void handleSysEx(const uint8* /*data*/, const size_t /*numBytes*/) {}
+        virtual void handleMidi(const MidiMessage& /*message*/) {}
         virtual void connectionStateChanged() {}
         
         // ------------------------------------------------------------------------
@@ -226,44 +226,49 @@ namespace Midi
         
         // ------------------------------------------------------------------------
         
-        void getIndexes(bool& wouldConnectToBootloader, int& outputIndex, int& inputIndex) const
+        String findIdentifierInMidiInfo(const juce::Array<MidiDeviceInfo>& mdInfo, String deviceName) const
         {
-            juce::StringArray sa;
-            int index;
-            sa = juce::MidiOutput::getDevices();
-            index = sa.indexOf(device);
-            if (index >= 0)
+            const int size = mdInfo.size();
+            int index = 0;
+            while ((index < size) && (mdInfo[index].name != deviceName))
             {
-                outputIndex = index;
+                index++;
+            }
+            return (index == size) ? String() : mdInfo[index].identifier;
+        }
+
+        // ------------------------------------------------------------------------
+
+        void getIdentifiers(bool& wouldConnectToBootloader, String& outputIdentifier, String& inputIdentifier) const
+        {
+            const juce::Array<MidiDeviceInfo>& outInfo = MidiOutput::getAvailableDevices();
+            outputIdentifier = findIdentifierInMidiInfo(outInfo, device);
+            if (outputIdentifier.isNotEmpty())
+            {
                 wouldConnectToBootloader = false;
             }
             else
             {
-                index = sa.indexOf(bootloader);
-                if (index >= 0)
-                {
-                    outputIndex = index;
-                    wouldConnectToBootloader = true;
-                }
-                else
-                {
-                    outputIndex = -1;
-                }
+                outputIdentifier = findIdentifierInMidiInfo(outInfo, bootloader);
+                wouldConnectToBootloader = true;
             }
 
-            if (outputIndex >= 0)
+            inputIdentifier = String();
+            if (outputIdentifier.isNotEmpty())
             {
-                sa = juce::MidiInput::getDevices();
+                const juce::Array<MidiDeviceInfo>& inInfo = MidiOutput::getAvailableDevices();
                 if (wouldConnectToBootloader)
                 {
-                    inputIndex = sa.indexOf(bootloader);
+                    inputIdentifier = findIdentifierInMidiInfo(inInfo, bootloader);
                 }
                 else
                 {
-                    inputIndex = sa.indexOf(device);
+                    inputIdentifier = findIdentifierInMidiInfo(inInfo, device);
                 }
             }
         }
+
+        // ------------------------------------------------------------------------
 
     private:
         static constexpr int TimeoutMilliseconds = 600;
