@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # Cross-sections for the wireframe head.
 #
 # Based on images adapted from Burkhard and Sachs; deployed in my PhD thesis;

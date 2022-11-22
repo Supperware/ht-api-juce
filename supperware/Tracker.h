@@ -20,6 +20,7 @@ public:
     {
         bool rightEarChirality;
         bool compassOn;
+        bool compassSlowCorrection;
         bool gestureShakeToCalibrate;
         bool gestureTapToZero; 
         TravelMode travelMode;
@@ -48,7 +49,7 @@ public:
         /** Quaternions. */
         virtual void trackerOrientationQ(float /*qw*/, float /*qx*/, float /*qy*/, float /*qz*/) {}
         /** Rotation matrix. */
-        virtual void trackerOrientationM(Vector3D<float> /*x*/, Vector3D<float> /*y*/, Vector3D<float> /*z*/) {}
+        virtual void trackerOrientationM(float* /*matrix*/) {}
 
         /** Called when the compass state changes */
         virtual void trackerCompassStateChanged(CompassState /*compassState*/) {}
@@ -95,9 +96,9 @@ public:
         buffer[7] = 0x01; // - Parameter 1 : Data output and formatting
         switch (angleMode)
         {
-            case AngleMode::YPR:        buffer[9] = 0x01; break;
-            case AngleMode::Quaternion: buffer[9] = 0x05; break;
-            default:                    buffer[9] = 0x09;
+            case AngleMode::YPR:        buffer[8] = 0x01; break;
+            case AngleMode::Quaternion: buffer[8] = 0x05; break;
+            default:                    buffer[8] = 0x09;
         }
         buffer[9] = 0x03; // - Parameter 3 : Magnetometer control (to set verbose)
         buffer[10] = 0x40;
@@ -156,16 +157,21 @@ public:
 
     // ------------------------------------------------------------------------
 
-    /** Format a System Exclusive message to turn the compass on or off
-        (when it's off, it's in 'slow central pull' mode). */
-    size_t compassMessage(uint8_t* buffer, bool compassShouldBeOn, UpdateMode updateMode = UpdateWithoutNotifying)
+    /** Format a System Exclusive message to turn the compass on or off. */
+    size_t compassMessage(uint8_t* buffer, bool compassShouldBeOn,
+        bool compassShouldApplyYawCorrection,
+        UpdateMode updateMode = UpdateMode::UpdateWithoutNotifying)
     {
-        if ((updateMode != DontUpdateState) && (state.compassOn != compassShouldBeOn))
+        if (updateMode != UpdateMode::DontUpdateState)
         {
             state.compassOn = compassShouldBeOn;
+            state.compassSlowCorrection = compassShouldApplyYawCorrection;
             notifyIfNecessary(updateMode);
         }
-        return singleValueSysex(buffer, 0x00, 0x03, (compassShouldBeOn) ? 0x70 : 0x60);
+        uint8_t v = 0x60;
+        if (compassShouldBeOn) v |= 0x10;
+        if (!compassShouldApplyYawCorrection) v |= 0x08; // inverted!
+        return singleValueSysex(buffer, 0x00, 0x03, v);
     }
 
     // ------------------------------------------------------------------------
@@ -218,17 +224,12 @@ public:
         }
         if (sysexMatch(buffer, numBytes, 23, 0x40, 0x02))
         {
-            Vector3D<float> x, y, z;
-            x.x = bytes211ToFloat(buffer + 5);
-            x.y = bytes211ToFloat(buffer + 7);
-            x.z = bytes211ToFloat(buffer + 9);
-            y.x = bytes211ToFloat(buffer + 11);
-            y.y = bytes211ToFloat(buffer + 13);
-            y.z = bytes211ToFloat(buffer + 15);
-            z.x = bytes211ToFloat(buffer + 17);
-            z.y = bytes211ToFloat(buffer + 19);
-            z.z = bytes211ToFloat(buffer + 21);
-            if (l) l->trackerOrientationM(x, y, z);
+            float matrix[9];
+            for (uint8_t i = 0; i < 9; ++i)
+            {
+                matrix[i] = bytes211ToFloat(buffer + 5 + 2*i);
+            }
+            if (l) l->trackerOrientationM(matrix);
             return true;
         }
         if ((buffer[3] == 0x42) && (numBytes >= 6) && !(numBytes & 1))
@@ -317,7 +318,8 @@ private:
         if (parameter == 0x03)
         {
             // compass control
-            state.compassOn = (value & 0x38) >= 0x30;
+            state.compassOn = (value & 0x10) == 0x10;
+            state.compassSlowCorrection = (value & 0x08) == 0x00; // inverted!
             switch (value & 3)
             {
             case 1: state.compassState = CompassState::BadData; break;

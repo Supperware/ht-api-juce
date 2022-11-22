@@ -41,7 +41,7 @@ namespace Midi
 
         bool canConnect(const Connection option = Connection::AsEither) const
         {
-            String outputIdentifier, inputIdentifier;
+            juce::String outputIdentifier, inputIdentifier;
             bool wouldConnectToBootloader;
             getIdentifiers(wouldConnectToBootloader, outputIdentifier, inputIdentifier);
             if ((option == Connection::AsDevice) && wouldConnectToBootloader)
@@ -99,15 +99,15 @@ namespace Midi
 
         bool connect()
         {
-            String outputIdentifier, inputIdentifier;
+            juce::String outputIdentifier, inputIdentifier;
             bool connectingToBootloader = false;
             getIdentifiers(connectingToBootloader, outputIdentifier, inputIdentifier);
             disconnect();
             
             if (outputIdentifier.isNotEmpty() && inputIdentifier.isNotEmpty())
             {
-                midiOut = MidiOutput::openDevice(outputIdentifier);
-                midiIn  = MidiInput::openDevice(inputIdentifier, this);
+                midiOut = juce::MidiOutput::openDevice(outputIdentifier);
+                midiIn  = juce::MidiInput::openDevice(inputIdentifier, this);
                 if (midiOut && midiIn)
                 {
                     midiIn->start();
@@ -156,7 +156,7 @@ namespace Midi
 
             if (message.isSysEx())
             {
-                const uint8* m = message.getSysExData();
+                const uint8_t* m = message.getSysExData();
                 const size_t s = message.getSysExDataSize();
                 handleSysEx(m, s);
             }
@@ -209,8 +209,8 @@ namespace Midi
 
         // ------------------------------------------------------------------------
 
-        virtual void handleSysEx(const uint8* /*data*/, const size_t /*numBytes*/) {}
-        virtual void handleMidi(const MidiMessage& /*message*/) {}
+        virtual void handleSysEx(const uint8_t* /*data*/, const size_t /*numBytes*/) {}
+        virtual void handleMidi(const juce::MidiMessage& /*message*/) {}
         virtual void connectionStateChanged() {}
         
         // ------------------------------------------------------------------------
@@ -226,7 +226,7 @@ namespace Midi
         
         // ------------------------------------------------------------------------
         
-        String findIdentifierInMidiInfo(const juce::Array<MidiDeviceInfo>& mdInfo, String deviceName) const
+        juce::String findIdentifierInMidiInfo(const juce::Array<juce::MidiDeviceInfo>& mdInfo, juce::String deviceName) const
         {
             const int size = mdInfo.size();
             int index = 0;
@@ -234,14 +234,14 @@ namespace Midi
             {
                 index++;
             }
-            return (index == size) ? String() : mdInfo[index].identifier;
+            return (index == size) ? juce::String() : mdInfo[index].identifier;
         }
 
         // ------------------------------------------------------------------------
 
-        void getIdentifiers(bool& wouldConnectToBootloader, String& outputIdentifier, String& inputIdentifier) const
+        void getIdentifiers(bool& wouldConnectToBootloader, juce::String& outputIdentifier, juce::String& inputIdentifier) const
         {
-            const juce::Array<MidiDeviceInfo>& outInfo = MidiOutput::getAvailableDevices();
+            const juce::Array<juce::MidiDeviceInfo>& outInfo = juce::MidiOutput::getAvailableDevices();
             outputIdentifier = findIdentifierInMidiInfo(outInfo, device);
             if (outputIdentifier.isNotEmpty())
             {
@@ -253,10 +253,10 @@ namespace Midi
                 wouldConnectToBootloader = true;
             }
 
-            inputIdentifier = String();
+            inputIdentifier = juce::String();
             if (outputIdentifier.isNotEmpty())
             {
-                const juce::Array<MidiDeviceInfo>& inInfo = MidiOutput::getAvailableDevices();
+                const juce::Array<juce::MidiDeviceInfo>& inInfo = juce::MidiOutput::getAvailableDevices();
                 if (wouldConnectToBootloader)
                 {
                     inputIdentifier = findIdentifierInMidiInfo(inInfo, bootloader);

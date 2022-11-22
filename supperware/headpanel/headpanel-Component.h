@@ -24,18 +24,18 @@ namespace HeadPanel
 
         HeadPanel() :
             listener(nullptr),
-            trackerDriver(this),
-            headMatrix(),
             settingsPanel(trackerDriver),
             hbConfigure(this, 0),
             hbConnect(this, 1),
-            plot(),
             doRepaint(false),
+            gazeInitial(0),
+            gazeNow(0),
             midiState(Midi::State::Unavailable)
         {
             juce::MemoryInputStream mis(BinaryData::mini_tile_png, BinaryData::mini_tile_pngSize, false);
             juce::Image im = juce::ImageFileFormat::loadFrom(mis);
 
+            trackerDriver.addListener(this);
             setSize(148, 104);
             doButton(hbConfigure, im, 0, 2, 6);
             doButton(hbConnect, im, 1, 2, 58);
@@ -109,17 +109,9 @@ namespace HeadPanel
                     hbConnect.setVisible(false);
                     headMatrix.zero();
                 }
-                settingsPanel.trackConnectionState(newState);
                 if (listener) listener->trackerChanged(headMatrix);
                 flagRepaint();
             }
-        }
-
-        //----------------------------------------------------------------------
-
-        void trackerCompassStateChanged(Tracker::CompassState compassState) override
-        {
-            settingsPanel.trackCompassState(compassState);
         }
 
         //----------------------------------------------------------------------
@@ -130,6 +122,28 @@ namespace HeadPanel
         }
 
         //----------------------------------------------------------------------
+
+        void mouseDown(const juce::MouseEvent& /*event*/) override
+        {
+            gazeInitial = gazeNow;
+        }
+
+        // -------------------------------------------------------------------------
+
+        void mouseDrag(const juce::MouseEvent& event) override
+        {
+            if (midiState == Midi::State::Connected)
+            {
+                int s = event.getDistanceFromDragStartY();
+                gazeNow = gazeInitial - (s / 2.0f);
+                if (gazeNow > 90.0f) gazeNow = 90.0f;
+                if (gazeNow < 0.0f)  gazeNow = 0.0f;
+                plot.setGazeAngle(gazeNow);
+                flagRepaint();
+            }
+        }
+
+        // -------------------------------------------------------------------------
 
         void mouseDoubleClick(const juce::MouseEvent& /*event*/) override
         {
@@ -217,7 +231,11 @@ namespace HeadPanel
         HeadButton hbConfigure, hbConnect;
         HeadPlot plot;
         bool doRepaint;
+        float gazeInitial, gazeNow;
+
         Midi::State midiState;
+
+        //----------------------------------------------------------- ----------
 
         void flagRepaint()
         {

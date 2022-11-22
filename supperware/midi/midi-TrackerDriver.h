@@ -20,7 +20,7 @@ namespace Midi
             /** Callbacks inherited from Tracker. */
             virtual void trackerOrientation(float /*yawRadian*/, float /*pitchRadian*/, float /*rollRadian*/) {}
             virtual void trackerOrientationQ(float /*qw*/, float /*qx*/, float /*qy*/, float /*qz*/) {}
-            virtual void trackerOrientationM(Vector3D<float> /*x*/, Vector3D<float> /*y*/, Vector3D<float> /*z*/) {}
+            virtual void trackerOrientationM(float* /*matrix*/) {}
             virtual void trackerCompassStateChanged(Tracker::CompassState /*compassState*/) {}
             virtual void trackerConnectionChanged(const Tracker::State& /*state*/) {}
 
@@ -29,11 +29,10 @@ namespace Midi
         };
 
         /** You must nominate a Tracker::Listener in the constructor. This is usually the parent class. */
-        TrackerDriver(Listener* listener) :
+        TrackerDriver() :
             MidiDuplex("Head Tracker", "Supperware Bootloader"),
-            l(listener),
             tracker(this),
-            isQuaternion(true),
+            angleMode(Tracker::AngleMode::Quaternion),
             is100Hz(false),
             isTrackerOn(false)
         {}
@@ -43,19 +42,52 @@ namespace Midi
         // pass through to our listener
         void trackerOrientation(float yawRadian, float pitchRadian, float rollRadian) override
         {
-            l->trackerOrientation(yawRadian, pitchRadian, rollRadian);
+            for (Listener* l: listeners)
+            {
+                l->trackerOrientation(yawRadian, pitchRadian, rollRadian);
+            }
         }
         void trackerOrientationQ(float qw, float qx, float qy, float qz) override
         {
-            l->trackerOrientationQ(qw, qx, qy, qz);
+            for (Listener* l: listeners)
+            {
+                l->trackerOrientationQ(qw, qx, qy, qz);
+            }
+        }
+        void trackerOrientationM(float* matrix) override
+        {
+            for (Listener* l: listeners)
+            {
+                l->trackerOrientationM(matrix);
+            }
         }
         void trackerCompassStateChanged(Tracker::CompassState compassState) override
         {
-            l->trackerCompassStateChanged(compassState);
+            for (Listener* l: listeners)
+            {
+                l->trackerCompassStateChanged(compassState);
+            }
         }
         void trackerConnectionChanged(const Tracker::State& state) override
         {
-            l->trackerConnectionChanged(state);
+            for (Listener* l: listeners)
+            {
+                l->trackerConnectionChanged(state);
+            }
+        }
+
+        // ------------------------------------------------------------------------
+
+        void addListener(Listener* listener)
+        {
+            listeners.push_back(listener);
+        }
+
+        // ------------------------------------------------------------------------
+
+        const Tracker::State& getState() const
+        {
+            return tracker.getState();
         }
 
         // ------------------------------------------------------------------------
@@ -84,9 +116,9 @@ namespace Midi
             if (connectionState == State::Connected)
             {
                 is100Hz = is100HzMode;
-                isQuaternion = isQuaternionMode;
+                angleMode = isQuaternionMode ? Tracker::AngleMode::Quaternion : Tracker::AngleMode::YPR;
                 isTrackerOn = true;
-                size_t numBytes = tracker.turnOnMessage(midiBuffer, isQuaternion, is100Hz);
+                size_t numBytes = tracker.turnOnMessage(midiBuffer, angleMode, is100Hz);
                 sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
             }
         }
@@ -120,11 +152,11 @@ namespace Midi
 
         // ------------------------------------------------------------------------
 
-        /** Turn compass on or off (when it's off, it's in 'slow central pull' mode).
+        /** Turn compass on or off.
             This state can be read back with getCompassState(). */
-        void setCompass(bool compassShouldBeOn)
+        void setCompass(bool compassShouldBeOn, bool compassShouldApplyYawCorrection)
         {
-            size_t numBytes = tracker.compassMessage(midiBuffer, compassShouldBeOn);
+            size_t numBytes = tracker.compassMessage(midiBuffer, compassShouldBeOn, compassShouldApplyYawCorrection);
             sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
         }
         
@@ -160,23 +192,26 @@ namespace Midi
             {
                 if (isTrackerOn)
                 {
-                    size_t numBytes = tracker.turnOnMessage(midiBuffer, isQuaternion, is100Hz);
+                    size_t numBytes = tracker.turnOnMessage(midiBuffer, angleMode, is100Hz);
                     sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
                 }
                 size_t numBytes = tracker.readbackMessage(midiBuffer);
                 sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
             }
-            l->trackerMidiConnectionChanged(connectionState);
+            for (Listener* l: listeners)
+            {
+                l->trackerMidiConnectionChanged(connectionState);
+            }
         }
 
         // ------------------------------------------------------------------------
 
     private:
-        Listener* l;
+        std::vector<Listener*> listeners;
         Tracker tracker;
         juce::Vector3D<float> position;
         uint8_t midiBuffer[16];
-        bool isQuaternion;
+        Tracker::AngleMode angleMode;
         bool is100Hz;
         bool isTrackerOn;
     };

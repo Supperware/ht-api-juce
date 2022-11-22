@@ -1,37 +1,39 @@
 /*
  * Head tracker configuration panels
  * Handles common activities concerning configuration windows
- * Copyright (c) 2021 Supperware Ltd.
+ * Copyright 2021 Supperware Ltd.
  */
 
 #pragma once
+
+class Properties;
 
 namespace ConfigPanel
 {
     enum class LabelStyle { SectionHeading, Description, Data, SubData };
 
     class BasePanel : public juce::Component, public juce::MultiTimer,
-        private juce::Button::Listener, private juce::ComboBox::Listener
+        private juce::Button::Listener, private juce::ComboBox::Listener,
+        private Midi::TrackerDriver::Listener
     {
     public:
         static constexpr int LabelWidth { 256 }; // window width is derived from LabelWidth
 
-        BasePanel(juce::String titleText) :
-            Component(),
-            labels(), textButtons(), toggleButtons(), comboBoxes(),
-            title(titleText), lookAndFeelRadio()
+        BasePanel(Midi::TrackerDriver& trackerDriver, Properties* properties, juce::String titleText) :
+            td(trackerDriver),
+            props(properties),
+            title(titleText),
+            doRepaint(false)
         {
             setOpaque(false);
+            td.addListener(this);
         }
 
         // ---------------------------------------------------------------------
 
         ~BasePanel()
         {
-            for (int i = 0; i < toggleButtons.size(); ++i)
-            {
-                toggleButtons[i]->setLookAndFeel(nullptr);
-            }
+            for (auto tb : toggleButtons) { tb->setLookAndFeel(nullptr); }
         }
 
         // ---------------------------------------------------------------------
@@ -69,22 +71,23 @@ namespace ConfigPanel
         // ---------------------------------------------------------------------
 
         /** Unilaterally enable or disable all controls */
-        void enablePanel(const bool shouldBeEnabled)
+        void setEnabled(const bool shouldBeEnabled)
         {
-            int i;
-            for (i = 0; i < textButtons.size(); ++i)
+            for (juce::TextButton* tb : textButtons)
             {
-                textButtons[i]->setEnabled(shouldBeEnabled);
+                tb->setEnabled(shouldBeEnabled);
             }
-            for (i = 0; i < toggleButtons.size(); ++i)
+            for (juce::ToggleButton* tb : toggleButtons)
             {
-                toggleButtons[i]->setEnabled(shouldBeEnabled);
+                tb->setEnabled(shouldBeEnabled);
             }
-            for (i = 0; i < comboBoxes.size(); ++i)
+            for (juce::ComboBox* cb : comboBoxes)
             {
-                comboBoxes[i]->setEnabled(shouldBeEnabled);
+                cb->setEnabled(shouldBeEnabled);
             }
         }
+
+        // ---------------------------------------------------------------------
 
         void paint(juce::Graphics& g) override
         {
@@ -102,10 +105,18 @@ namespace ConfigPanel
         // ------------------------------------------------------------------------
 
 protected:
+        Midi::TrackerDriver& td;
+        Properties* props;
+        juce::String title;
+        const juce::Colour TitleLabel = juce::Colour(0xff28789c);
+        const juce::Colour SectionLabel = juce::Colour(0xff529aca);
+
         juce::OwnedArray<juce::Label> labels;
         juce::OwnedArray<juce::TextButton> textButtons;
         juce::OwnedArray<juce::ToggleButton> toggleButtons;
         juce::OwnedArray<juce::ComboBox> comboBoxes;
+
+        static constexpr int Indent { 18 };
 
         // ------------------------------------------------------------------------
 
@@ -201,26 +212,26 @@ protected:
 
         // ------------------------------------------------------------------------
 
-    protected:
-        juce::String title;
-        const juce::Colour TitleLabel = juce::Colour(0xff28789c);
-        const juce::Colour SectionLabel = juce::Colour(0xff529aca);
-
-        static constexpr int Indent { 18 };
-
         int yOrigin()
         {
             return (title.isEmpty()) ? 2 : 22;
         }
 
-        void flagRepaint()
+        // ------------------------------------------------------------------------
+
+        void repaintAsync()
         {
-            startTimer(0, 17); // 60Hz repaint
+            if (!doRepaint)
+            {
+                doRepaint = true;
+                startTimer(0, 16); // 60Hz repaint
+            }
         }
 
         // ------------------------------------------------------------------------
 
     private:
+        bool doRepaint;
         LookAndFeelRadio lookAndFeelRadio;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BasePanel)

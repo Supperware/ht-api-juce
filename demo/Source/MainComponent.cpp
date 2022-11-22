@@ -3,6 +3,8 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
+    juce::LookAndFeel& lf = getLookAndFeel();
+    lf.setColour(juce::ResizableWindow::ColourIds::backgroundColourId, juce::Colour(0xff202020));
     headPanel.setListener(this);
     headPanel.setTopLeftPosition(8, 8);
     addAndMakeVisible(headPanel);

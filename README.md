@@ -13,6 +13,7 @@ There are two easy ways of making your app or plug-in compatible with the head t
 1. Your software is seamlessly integrated with the head tracker. Your users can just 'click the tick' to connect rather than fiddling with the bones of OSC, and the animated head and basic configuration are built into your program.
 2. It doesn't involve loading Bridgehead first.
 3. Latency will be lower than using OSC, as unmediated messages come straight from the head tracker.
+4. You don't mind including JUCE in your project, or its dependencies (including OpenGL), although see the note below about not using JUCE if you don't want to ...
 
 ### Reasons to use OSC via Bridgehead instead
 
