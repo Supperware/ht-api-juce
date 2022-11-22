@@ -67,7 +67,7 @@ namespace ConfigPanel
 
         // ---------------------------------------------------------------------
 
-        void trackerMidiConnectionChanged(const Midi::State& /*state*/) override
+        void trackerMidiConnectionChanged(Midi::State /*state*/) override
         {
             setEnabled(td.isConnected());
             refreshAsync();

@@ -87,7 +87,7 @@ namespace HeadPanel
 
         //----------------------------------------------------------------------
 
-        void trackerMidiConnectionChanged(const Midi::State& newState) override
+        void trackerMidiConnectionChanged(Midi::State newState) override
         {
             if (newState != midiState)
             {

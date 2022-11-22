@@ -25,7 +25,7 @@ namespace Midi
             virtual void trackerConnectionChanged(const Tracker::State& /*state*/) {}
 
             /** Called when the head tracker's connection state or its status data is changed */
-            virtual void trackerMidiConnectionChanged(const Midi::State& /*state*/) {}
+            virtual void trackerMidiConnectionChanged(Midi::State /*state*/) {}
         };
 
         /** You must nominate a Tracker::Listener in the constructor. This is usually the parent class. */
