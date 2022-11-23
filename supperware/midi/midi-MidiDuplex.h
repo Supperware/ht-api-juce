@@ -24,10 +24,10 @@ namespace Midi
             autoReconnect(false),
             autoDisconnect(true)
         {
-            // This timer doesn't ever stop: it handles unavailable/available signalling
-            // even when automatic modes are switched off.
-            // we use MultiTimer here because it's often necessary to use other timers
-            // in inherited classes.
+            /* This timer doesn't ever stop: it handles unavailable/available signalling
+               even when automatic modes are switched off.
+               MultiTimer is used here because it's often necessary to use other timers
+               in inherited classes. */
             startTimer(0, TimeoutMilliseconds);
          }
 

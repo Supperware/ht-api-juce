@@ -207,7 +207,6 @@ public:
         message.
         File transfer messages, used in upgrades, are handled outside this
         routine. */
-
     bool processSysex(const uint8_t* buffer, size_t numBytes)
     {
         if (sysexMatch(buffer, numBytes, 11, 0x40, 0x00))
