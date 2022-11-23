@@ -1,14 +1,14 @@
 /*
  * MIDI drivers
- * Copyright 2021 Supperware Ltd. All rights reserved.
+ * Manages input and output objects,
+ * to allow simple MIDI control of a device in both directions.
+ * Copyright (c) 2021 Supperware Ltd.
  */
 
 #pragma once
 
 namespace Midi
 {
-    /** Manages input and output objects,
-        to control MIDI traffic to a device in both directions. */
     enum class State { Unavailable, Available, Bootloader, Connected };
     enum class Connection { AsBootloader, AsDevice, AsEither };
 

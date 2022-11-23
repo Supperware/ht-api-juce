@@ -60,9 +60,8 @@ namespace HeadPanel
 
         void paint(juce::Graphics& g) override
         {
-            //g.setColour(Colour(0xff404040));
-            //g.drawRect(g.getClipBounds(), 1.0f);
-            plot.paint(g, 48 + 50, 48 + 4, 48.0f, 2.0f, midiState);
+            constexpr int HeadSize = 48;
+            plot.paint(g, HeadSize + 50, HeadSize + 4, static_cast<float>(HeadSize), 2.0f, midiState);
         }
 
         //----------------------------------------------------------------------

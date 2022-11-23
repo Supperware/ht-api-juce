@@ -85,9 +85,9 @@ namespace HeadPanel
                 const PointItem* p1 = &points[index];
                 if (!p1->closeLine)
                 {
-                    // the connecting point is always added to the list in sequence.
-                    // if we went backwards through the linked list here, our next point
-                    // would not necessarily be related to this line ...
+                    /* The connecting point is always added to the list in sequence.
+                       If we went backwards through the linked list here, our next point
+                       would not necessarily be related to this line ... */
                     const PointItem* p2 = &points[index + 1];
                     g.setColour(p1->colour);
                     g.drawLine(xMid + p1->x * scale, yMid - p1->z * scale,

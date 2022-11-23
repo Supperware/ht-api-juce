@@ -28,7 +28,6 @@ namespace Midi
             virtual void trackerMidiConnectionChanged(Midi::State /*state*/) {}
         };
 
-        /** You must nominate a Tracker::Listener in the constructor. This is usually the parent class. */
         TrackerDriver() :
             MidiDuplex("Head Tracker", "Supperware Bootloader"),
             tracker(this),
