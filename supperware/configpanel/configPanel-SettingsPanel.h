@@ -56,8 +56,8 @@ namespace ConfigPanel
                 {
                 case 0: if (isChecked) td.setChirality(false);  break;
                 case 1: if (isChecked) td.setChirality(true);   break;
-                case 2: if (isChecked) td.setCompass(isChecked, toggleButtons[3]->getToggleState());   break;
-                case 3: if (isChecked) td.setCompass(toggleButtons[2]->getToggleState(), isChecked);   break;
+                case 2: td.setCompass(isChecked, toggleButtons[3]->getToggleState());  break;
+                case 3: td.setCompass(toggleButtons[2]->getToggleState(), isChecked);  break;
                 case 4: if (isChecked) td.setTravelMode(Tracker::TravelMode::Off);     break;
                 case 5: if (isChecked) td.setTravelMode(Tracker::TravelMode::Slow);    break;
                 case 6: if (isChecked) td.setTravelMode(Tracker::TravelMode::Fast);    break;
