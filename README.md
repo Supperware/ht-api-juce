@@ -59,4 +59,4 @@ but you may want to leave autoDisconnect on when you're ready to deploy for the 
 
 ## Licensing
 
-See the `LICENSE` file in the headtracker folder! The API code is released under the MIT License. The `demo` app is based around JUCE boilerplate code with a handful of extra lines to show you how to get the panel working, and you can use this without restriction.
+See the `LICENSE` file in the supperware folder! The API code is released under the MIT License. The `demo` app is based around JUCE boilerplate code with a handful of extra lines to show you how to get the panel working, and you can use this without restriction.
