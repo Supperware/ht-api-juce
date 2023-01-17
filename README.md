@@ -44,7 +44,18 @@ In use, plug in a head tracker. A tick will become visible in the bottom left co
 
 A configuration window can be opened by clicking on the pictogram of the head tracker in the top-left. This presents a handy but reduced subset of the functions you would find if you were using _Bridgehead_.
 
-You probably don't care whether you're interfacing with the head tracker via quaternions or yaw, pitch, and roll. While the head tracker and API supports both (search for `trackerDriver.turnOn` in `supperware/headpanel/headpanel-Component.h`), it's recommended to keep using quaternions unless you have a great reasson not to. In head tracking, gimbal lock is mostly a problem in theory only: yaw/pitch/roll will start to go slightly awry when a user's head is pitched fully skywards or downwards, and generally people don't enjoy those contortions. But, if you use quaternions, you won't have to worry about them at all.
+You probably don't care whether you're interfacing with the head tracker via quaternions or yaw, pitch, and roll. While the head tracker and API supports both (search for `trackerDriver.turnOn` in `supperware/headpanel/headpanel-Component.h`), it's recommended to keep using quaternions unless you have a great reason not to, as you won't risk gimbal lock. That said, gimbal lock is mostly a problem in theory. First, yaw/pitch/roll will go awry when a user's head is pitched nearly fully skywards or downwards, and generally people don't enjoy those contortions. Second, everything is manipulated as orthonormal matrices inside the head tracker anyway so it's not going to lead to internal state chaos.
+
+## Notes from users
+
+The driver will disconnect if no data is received from the head tracker after a few hundred milliseconds. This feature is included because some operating systems won't let you know if a MIDI device you're talking to is unplugged mid-conversation. Usually the head tracker is sending data at 25Hz or more when it is connected and turned on, but if you are experimenting or using breakpoints in certain ways it is possible to hit this timeout. It can be disabled using two lines of code in MainComponent.cpp:
+
+```
+Midi::TrackerDriver td = headPanel.getTrackerDriver();
+td.setAutoDisconnect(false); // from the MidiDuplex class
+```
+
+but you may want to leave autoDisconnect on when you're ready to deploy for the reasons stated above.
 
 ## Licensing
 
