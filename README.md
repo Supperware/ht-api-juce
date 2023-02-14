@@ -17,8 +17,9 @@ There are two easy ways of making your app or plug-in compatible with the head t
 
 ### Reasons to use OSC and Bridgehead instead
 
-1. Windows is not multi-MIDI-client. If you expect people to have multiple instantiations of head-tracked apps or plug-ins open, only one will be able to interface with the head tracker's MIDI stream at any time. (If you click the tick and it won't turn green, this is generally why.) macOS does not have this limitation, and Bridgehead allows OSC to be cast to several ports at once.
-2. In your case, tightness of integration might be secondary to allowing users to remix or manipulate the head tracker data. Such users might prefer to work with OSC.
+1. It's usually easier.
+2. Windows is not multi-MIDI-client. If you expect people to have multiple instances of head-tracked apps or plug-ins open, you'll need Bridgehead so you can distribute one head tracker's data to many apps. (macOS does not have this limitation.)
+2. Tightness of integration might be less important to you than allowing users to remix or manipulate head tracker data. Those users might prefer to work with OSC.
 3. You won't have to download this code, or work with C++ or JUCE.
 
 ### Using this API without JUCE
