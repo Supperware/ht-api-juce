@@ -10,12 +10,13 @@ There are two easy ways of making your app or plug-in compatible with the head t
 
 ### Reasons to use this API
     
-1. Your software is seamlessly integrated with the head tracker. Your users can just 'click the tick' to connect rather than fiddling with the bones of OSC, and the animated head and basic configuration are built into your program.
-2. It doesn't involve loading Bridgehead first.
-3. Latency will be lower than using OSC, as unmediated messages come straight from the head tracker.
-4. You don't mind including JUCE in your project, or its dependencies (including OpenGL), although see the note below about not using JUCE if you don't want to ...
+1. Your software is seamlessly integrated with the head tracker, so the animated head and basic configuration that's normally a part of Bridgehead are built into your program.
+2. You cannot use Bridgehead: perhaps you're on a platform that it doesn't support, or you can't run third-party software on your setup.
+3. Ultra-low latency is really important to you, in which case you can talk directly to the head tracker without going through the OSC layer.
+4. You don't mind including JUCE in your project, or its dependencies (including OpenGL) ...
+5. ... but, even if you don't want JUCE, the helper classes here work without it and will save you a lot of time.
 
-### Reasons to use OSC via Bridgehead instead
+### Reasons to use OSC and Bridgehead instead
 
 1. Windows is not multi-MIDI-client. If you expect people to have multiple instantiations of head-tracked apps or plug-ins open, only one will be able to interface with the head tracker's MIDI stream at any time. (If you click the tick and it won't turn green, this is generally why.) macOS does not have this limitation, and Bridgehead allows OSC to be cast to several ports at once.
 2. In your case, tightness of integration might be secondary to allowing users to remix or manipulate the head tracker data. Such users might prefer to work with OSC.
