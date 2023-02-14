@@ -10,7 +10,7 @@ There are two easy ways of making your app or plug-in compatible with the head t
 
 ### Reasons to use this API
     
-1. You cannot use Bridgehead: perhaps you're on a platform that it doesn't support, or you can't run third-party software on your setup.
+1. You cannot use Bridgehead: perhaps you're on a platform that it doesn't support, or you can't include third-party software.
 2. Ultra-low latency is really important to you, in which case you can talk directly to the head tracker without going through the OSC layer.
 3. You don't mind including JUCE in your project, or its dependencies (including OpenGL) ...
 4. ... but, even if you don't want JUCE, the helper classes here work without it and will save you a lot of time.
