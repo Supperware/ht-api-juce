@@ -2,7 +2,7 @@
  * MIDI drivers
  * Supperware head tracker driver
  * see https://supperware.co.uk/headtracker for MIDI specification
- * Copyright (c) 2021 Supperware Ltd.
+ * Copyright (c) 2021-3 Supperware Ltd.
  */
 
 #pragma once
@@ -163,6 +163,23 @@ namespace Midi
         
         // ------------------------------------------------------------------------
 
+        /** Turn shake-to-zero gesture on or off. */
+        void setGestures(bool shakeToZero)
+        {
+            size_t numBytes = tracker.gestureMessage(midiBuffer, shakeToZero);
+            sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
+        }
+
+        // ------------------------------------------------------------------------
+
+        /** Change central pull speed. */
+        void setPullSpeed(unsigned char pullSpeed)
+        {
+            size_t numBytes = tracker.pullSpeedMessage(midiBuffer, pullSpeed);
+            sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
+        }
+
+        // ------------------------------------------------------------------------
         /** Put compass in calibration mode. */
         void calibrateCompass()
         {

@@ -29,7 +29,7 @@ namespace Midi
                MultiTimer is used here because it's often necessary to use other timers
                in inherited classes. */
             startTimer(0, TimeoutMilliseconds);
-         }
+        }
 
         // ------------------------------------------------------------------------
 

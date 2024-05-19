@@ -21,16 +21,16 @@ public:
         bool rightEarChirality;
         bool compassOn;
         bool compassSlowCorrection;
-        bool gestureShakeToCalibrate;
-        bool gestureTapToZero; 
+        bool gestureShakeToZero;
+        unsigned char pullSpeed;                                 
         TravelMode travelMode;
         CompassState compassState;
 
         State() :
             rightEarChirality(false),
             compassOn(false),
-            gestureShakeToCalibrate(false),
-            gestureTapToZero(false),
+            gestureShakeToZero(false),
+            pullSpeed(5),
             travelMode(TravelMode::Off),
             compassState(CompassState::Off)
         {}
@@ -159,6 +159,23 @@ public:
 
     // ------------------------------------------------------------------------
 
+    /** Format a System Exclusive message to turn the shake-to-zero gesture
+        on or off. */
+    size_t gestureMessage(uint8_t* buffer, bool shakeToZero,
+        UpdateMode updateMode = UpdateMode::UpdateWithoutNotifying)
+    {
+        if ((updateMode != UpdateMode::DontUpdateState) && (state.gestureShakeToZero != shakeToZero))
+        {
+            state.gestureShakeToZero = shakeToZero;
+            notifyIfNecessary(updateMode);
+        }
+        uint8_t value = 0x10;
+        if (shakeToZero) value |= 0x08;
+        return singleValueSysex(buffer, 0x00, 0x04, value);
+    }
+
+    // ------------------------------------------------------------------------
+
     /** Format a System Exclusive message to turn the compass on or off. */
     size_t compassMessage(uint8_t* buffer, bool compassShouldBeOn,
         bool compassShouldApplyYawCorrection,
@@ -178,6 +195,23 @@ public:
 
     // ------------------------------------------------------------------------
 
+    /** Format a System Exclusive message to change the speed of slow central
+        pull (speed = 0.05 + (0.05 * pullSpeed) degrees per second;
+        factory default pullSpeed is 5, or 0.30 degrees per second. */
+    size_t pullSpeedMessage(uint8_t* buffer, unsigned char pullSpeed,
+        UpdateMode updateMode = UpdateMode::UpdateWithoutNotifying)
+    {
+        if (updateMode != UpdateMode::DontUpdateState)
+        {
+            state.pullSpeed = pullSpeed;
+            notifyIfNecessary(updateMode);
+        }
+        uint8_t value = pullSpeed & 0x1f;
+        return singleValueSysex(buffer, 0x00, 0x06, value);
+    }
+
+    // ------------------------------------------------------------------------
+
     /** Format a System Exclusive message to put the compass in calibration mode. */
     size_t calibrateCompassMessage(uint8_t* buffer) const
     {
@@ -191,11 +225,12 @@ public:
         this will refresh the Status object and notify the listener. */
     size_t readbackMessage(uint8_t* buffer) const
     {
-        constexpr int MessageLength = 9;
+        constexpr int MessageLength = 10;
         supperwareSysex(buffer, MessageLength);
         buffer[4] = 0x02; // Message 2 : Readback
         buffer[5] = 0x03; // -- Magnetometer
         buffer[6] = 0x04; // -- Gesture and chirality
+        buffer[7] = 0x06; // -- Central pull speed
         buffer[7] = 0x11; // -- Travel mode
         return MessageLength;
     }
@@ -337,8 +372,7 @@ private:
         else if (parameter == 0x04)
         {
             state.rightEarChirality = (value & 3) == 3;
-            state.gestureShakeToCalibrate = (value & 0x14) == 0x14;
-            state.gestureTapToZero = (value & 0x18) == 0x18;
+            state.gestureShakeToZero = (value & 0x18) == 0x18;
         }
         else if (parameter == 0x05)
         {
@@ -355,6 +389,10 @@ private:
                 if (value == 6) l->trackerGyroCalibrated();
                 else if (value) l->trackerCompassStateChanged(state.compassState);
             }
+        }
+        else if (parameter == 0x06)
+        {
+            state.pullSpeed = value & 0x1f;
         }
         else if (parameter == 0x11)
         {
