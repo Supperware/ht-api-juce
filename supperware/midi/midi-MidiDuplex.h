@@ -233,7 +233,7 @@ namespace Midi
         {
             const int size = mdInfo.size();
             int index = 0;
-            while ((index < size) && (mdInfo[index].name != deviceName))
+            while ((index < size) && !(mdInfo[index].name.startsWith(deviceName)))
             {
                 index++;
             }
