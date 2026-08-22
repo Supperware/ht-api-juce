@@ -171,7 +171,7 @@ namespace HeadPanel
                 // connect/disconnect button
                 if (midiState == Midi::State::Available)
                 {
-                    trackerDriver.connect();
+                    // turnOn() connects first if it needs to
                     trackerDriver.turnOn(false, true);
                 }
                 else
