@@ -22,15 +22,18 @@ public:
         bool compassOn;
         bool compassSlowCorrection;
         bool gestureShakeToZero;
-        unsigned char pullSpeed;                                 
+        unsigned char pullSpeed;
+        unsigned char shakeStage;
         TravelMode travelMode;
         CompassState compassState;
 
         State() :
             rightEarChirality(false),
             compassOn(false),
+            compassSlowCorrection(false),
             gestureShakeToZero(false),
             pullSpeed(5),
+            shakeStage(0),
             travelMode(TravelMode::Off),
             compassState(CompassState::Off)
         {}
@@ -59,6 +62,9 @@ public:
 
         /** Called when the gyroscope calibration has finished */
         virtual void trackerGyroCalibrated() {}
+
+        /** Called as the user advances through shake-to-zero stages 0-4 */
+        virtual void trackerShakeStage(const State& /*state*/) {}
     };
 
     // ------------------------------------------------------------------------
@@ -244,6 +250,10 @@ public:
         routine. */
     bool processSysex(const uint8_t* buffer, size_t numBytes)
     {
+        // every message we can parse carries our manufacturer ID, a message number
+        // and a parameter. nothing shorter can be parsed or indexed into.
+        if (numBytes < 5) return false;
+
         if (sysexMatch(buffer, numBytes, 11, 0x40, 0x00))
         {
             float yawRadian = bytes211ToFloat(buffer + 5);
@@ -376,17 +386,28 @@ private:
         }
         else if (parameter == 0x05)
         {
-            switch (value)
+            if (value >= 8)
             {
-            case 1: state.compassState = CompassState::Calibrating; break;
-            case 2: state.compassState = CompassState::Succeeded; break;
-            case 3: state.compassState = CompassState::Failed; break;
-            case 4: state.compassState = CompassState::BadData; break;
-            case 5: state.compassState = CompassState::GoodData; break;
+                // shake-to-zero gesture stages 0-4. These used to fall through the
+                // switch below and report a stale compass state to the listener.
+                state.shakeStage = value - 8;
+            }
+            else
+            {
+                state.shakeStage = 0;
+                switch (value)
+                {
+                case 1: state.compassState = CompassState::Calibrating; break;
+                case 2: state.compassState = CompassState::Succeeded; break;
+                case 3: state.compassState = CompassState::Failed; break;
+                case 4: state.compassState = CompassState::BadData; break;
+                case 5: state.compassState = CompassState::GoodData; break;
+                }
             }
             if (l)
             {
                 if (value == 6) l->trackerGyroCalibrated();
+                else if (value >= 8) l->trackerShakeStage(state);
                 else if (value) l->trackerCompassStateChanged(state.compassState);
             }
         }

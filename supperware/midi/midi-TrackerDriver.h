@@ -23,6 +23,7 @@ namespace Midi
             virtual void trackerOrientationM(float* /*matrix*/) {}
             virtual void trackerCompassStateChanged(Tracker::CompassState /*compassState*/) {}
             virtual void trackerConnectionChanged(const Tracker::State& /*state*/) {}
+            virtual void trackerShakeStage(const Tracker::State& /*state*/) {}
 
             /** Called when the head tracker's connection state or its status data is changed */
             virtual void trackerMidiConnectionChanged(Midi::State /*state*/) {}
@@ -74,12 +75,29 @@ namespace Midi
                 l->trackerConnectionChanged(state);
             }
         }
+        void trackerShakeStage(const Tracker::State& state) override
+        {
+            for (Listener* l: listeners)
+            {
+                l->trackerShakeStage(state);
+            }
+        }
 
         // ------------------------------------------------------------------------
 
         void addListener(Listener* listener)
         {
             listeners.push_back(listener);
+        }
+
+        // ------------------------------------------------------------------------
+
+        /** Listeners must be removed before they are destroyed, unless they outlive
+            the TrackerDriver itself. */
+        void removeListener(Listener* listener)
+        {
+            listeners.erase(std::remove(listeners.begin(), listeners.end(), listener),
+                            listeners.end());
         }
 
         // ------------------------------------------------------------------------
@@ -108,17 +126,22 @@ namespace Midi
             These settings are remembered if you enable setAutoDisconnect / setAutoReconnect. */
         void turnOn(bool is100HzMode = false, bool isQuaternionMode = true)
         {
-            if (connectionState != State::Connected)
+            currentAngleMode = isQuaternionMode ? Tracker::AngleMode::Quaternion : Tracker::AngleMode::YPR;
+            is100Hz = is100HzMode;
+
+            /* Record the request even if we can't act on it yet. connectionStateChanged()
+               replays it every time the tracker connects, which is what makes the
+               setting stick across an automatic reconnection. */
+            const bool wasConnected = (connectionState == State::Connected);
+            isTrackerOn = true;
+
+            if (!wasConnected)
             {
+                // connectionStateChanged() sends the message if this succeeds
                 connect();
             }
-
-            currentAngleMode = isQuaternionMode ? Tracker::AngleMode::Quaternion : Tracker::AngleMode::YPR;
-
-            if (connectionState == State::Connected)
+            else
             {
-                is100Hz = is100HzMode;
-                isTrackerOn = true;
                 size_t numBytes = tracker.turnOnMessage(midiBuffer, currentAngleMode, is100Hz);
                 sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
             }
@@ -210,6 +233,13 @@ namespace Midi
             {
                 size_t numBytes = tracker.readbackMessage(midiBuffer);
                 sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
+
+                if (isTrackerOn)
+                {
+                    // an automatic reconnection would otherwise leave the tracker silent
+                    numBytes = tracker.turnOnMessage(midiBuffer, currentAngleMode, is100Hz);
+                    sendMessage(juce::MidiMessage(midiBuffer, (int)numBytes));
+                }
             }
             for (Listener* l: listeners)
             {
